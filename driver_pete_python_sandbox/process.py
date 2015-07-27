@@ -7,19 +7,19 @@ from matplotlib.dates import datestr2num, num2date
 import urllib
 import cv2
 from geopy.distance import vincenty
-from cogo.filter_gps import extract_delta_time, compute_velocities, read_data,\
+from driver_pete_python_sandbox.filter_gps import extract_delta_time, compute_velocities, \
     ms_to_mph, filter_gps_data, extract_delta_dist, delta_float_time
 import cPickle
 from geopy.distance import vincenty
-from cogo.gmaps import get_static_google_map
+from driver_pete_python_sandbox.gmaps import get_static_google_map
 
 from geopy.geocoders import GoogleV3 as Geocoder
-
+from driver_pete_python_sandbox.trajectory_reader import read_compressed_trajectory
 
 
 def process_gps_data(filename):
     
-    data = filter_gps_data(read_data(filename))
+    data = filter_gps_data(read_compressed_trajectory(filename))
 
     delta_time = extract_delta_time(data) 
     stationary_points = np.where(delta_time>60*15)[0]
@@ -53,10 +53,10 @@ def process_gps_data(filename):
 
     velocities = compute_velocities(data)
     plots.plot(delta_time)
-    plots.show()
+    #plots.show()
 
     plots.hist(velocities*ms_to_mph, 100)
-    plots.show()
+    #plots.show()
     
     times, coordinates = data[:, 0], data[:, 1:]
     center = np.average(coordinates, axis=0)
@@ -64,7 +64,7 @@ def process_gps_data(filename):
 
     imgdata = get_static_google_map(#center=center,
                                     #zoom=14,
-                                    markers=coordinates[150:170])
+                                    markers=coordinates[90:170])
 
     cv2.imshow('A', imgdata)
     cv2.waitKey()
@@ -74,4 +74,5 @@ def process_gps_data(filename):
 
 
 if __name__ == '__main__':
-    process_gps_data('~/Downloads/lowes_gps.txt')   
+    process_gps_data("~/Downloads/trajectory.dp")
+

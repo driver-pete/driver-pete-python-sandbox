@@ -16,10 +16,6 @@ ms_to_mph = 2.23694
 ms_to_kmh = 3.6
 
 
-def read_data(filename):
-    return np.loadtxt(os.path.expanduser(filename),
-                      converters={0: datestr2num})
-
 def delta_float_time(time_float1, time_float2):
     return (num2date(time_float2) - num2date(time_float1)).total_seconds()
 

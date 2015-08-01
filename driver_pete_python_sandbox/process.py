@@ -26,19 +26,11 @@ def trajectory_point_to_str(data, index):
         duration = num2date(data[index+1][0]) - date
     except IndexError:
         duration = "NO DATA"
-    return "Date:%s; Address:%s; Duration:%s;" % (date, address, duration)
+    return "Index:%s; Date:%s; Address:%s; Coords: %s; Duration:%s;" % \
+            (index, date, request, address, duration)
 
 
-def process_gps_data(filename):
-    
-    # clean up data
-    data = filter_gps_data(read_compressed_trajectory(filename))
-    
-    print("Length of data: %d" % len(data))
-    
-    # merge points which are closer than 50m 
-    data = remove_stationary_points(data, distance_threshold=50)
-
+def find_endpoints(data):
     # get delta time array in seconds
     delta_time = extract_delta_time(data) 
 
@@ -46,25 +38,42 @@ def process_gps_data(filename):
     stationary_threshold = (60*60) * 3  # hours
     stationary_points = np.where(delta_time>stationary_threshold)[0]
     stationary_points = [0] + list(stationary_points) + [data.shape[0]-1]
-    print("Found %d stationary points:" % len(stationary_points))
-    for s in stationary_points:
-        print(trajectory_point_to_str(data, s))
+    
+    print("Found %d stationary points:" % (len(stationary_points)))
+    for p in stationary_points:
+        print(trajectory_point_to_str(data, p))
 
     # filter out stationary points that are driving-distance (2km) close to each other
-    is_close = lambda p1, p2: vincenty(p1, p2).meters < 2000
+    is_close = lambda p1, p2: vincenty(p1, p2).meters < 1000
     # predicate to determine if two points are close based on index in the trajectory
     is_index_close = lambda index1, index2: is_close(data[index1][1:], data[index2][1:])
 
-    unique_locations = [0]
+    unique_locations = [stationary_points[0]]
     for s in stationary_points:
-        if next((u for u in unique_locations
-                 if is_index_close(s, u)), None) is None:
+        candidates = (u for u in unique_locations
+                      if is_index_close(s, u))
+        if next(candidates, None) is None:
             unique_locations.append(s)
+
+    return unique_locations
     
-    print("Found %s unique locations:")
-    for u in unique_locations:
+
+
+def process_gps_data(filename):
+    # clean up data
+    data = filter_gps_data(read_compressed_trajectory(filename))
+    print("Length of data: %d" % len(data)) 
+    
+    # merge points which are closer than 50m 
+    data = remove_stationary_points(data, distance_threshold=50)
+
+    endpoints = find_endpoints(data)
+    assert(len(endpoints) == 2)
+    print("Found %d endpoints:" % len(endpoints))
+    for u in endpoints:
         print(trajectory_point_to_str(data, u))
 
+    return
     # candidate paths
     candidate_paths = [[stationary_points[i], stationary_points[i+1]]
                        for i in range(len(stationary_points)-1)]

@@ -1,7 +1,6 @@
 import os
 from driver_pete_python_sandbox.trajectory_reader import read_compressed_trajectory,\
     write_compressed_trajectory
-from matplotlib.dates import num2date
 import numpy as np
 
 

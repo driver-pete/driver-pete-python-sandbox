@@ -48,14 +48,13 @@ def process_gps_data(filename):
 
     print(paths)
     print(times)
-    
 
     velocities = compute_velocities(data)
     plots.plot(delta_time)
-    #plots.show()
+    plots.show()
 
     plots.hist(velocities*ms_to_mph, 100)
-    #plots.show()
+    plots.show()
     
     times, coordinates = data[:, 0], data[:, 1:]
     center = np.average(coordinates, axis=0)

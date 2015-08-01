@@ -44,10 +44,12 @@ def remove_duplicate_points(data):
     '''
     delta_time = extract_delta_time(data)
     # remove all entries that has dt less than 1 second
-    return np.delete(data, np.where(delta_time < 1.)[0], axis=0)
+    result = np.delete(data, np.where(delta_time < 1.)[0], axis=0)
+    print("Removed %d duplicate points." % (len(data) - len(result)))
+    return result
 
 
-def remove_outliers(data, thershold=85):
+def remove_outliers_impl(data, thershold=85):
     '''
     Typical bad gps samples look like this:
     i  time     long.         lat      dt   ds      v (mph)       
@@ -68,24 +70,41 @@ def remove_outliers(data, thershold=85):
     outliers = np.where(velocities*ms_to_mph > 85)[0]
     return np.delete(data, outliers, axis=0)
 
+
+def remove_outliers(data, thershold=85):
+    '''
+    see remove_outliers_impl first.
+    It is probable that bad gps samples might come in sequence.
+    in this case we just do several passes of removing outliers
+    '''
+    total_removed = 0
+    while True:
+        result = remove_outliers_impl(data, thershold)
+        outliers_removed = (len(data) - len(result))
+        total_removed += outliers_removed
+        if outliers_removed == 0:
+            print("Removed %d outliers." % total_removed)
+            # check that there are no huge velocities left
+            velocities = compute_velocities(result) 
+            assert(np.amax(velocities)*ms_to_mph < thershold)
+            return result
+        else:
+            data = result
+
+
 def remove_stationary_points(data):
     '''
     If coordinates are not changing, there is no need to keep the record because
     timestamp can always show how long did we spend at that place
     '''
     delta_dist = extract_delta_dist(data)
-    return np.delete(data, np.where(delta_dist < 1.)[0] + 1, axis=0)
+    result = np.delete(data, np.where(delta_dist < 1.)[0] + 1, axis=0)
+    print("Removed %d stationary points." % (len(data) - len(result)))
+    return result
 
 
 def filter_gps_data(data, thershold=85):
     data = remove_duplicate_points(data)
     data = remove_stationary_points(data)
-    # it is probable that bad gps samples might come in sequence.
-    # in this case we just do several passes of removing outliers
-    for i in range(3):
-        data = remove_outliers(data, thershold)
-    
-    # check that there are no huge velocities left
-    velocities = compute_velocities(data) 
-    assert(np.amax(velocities)*ms_to_mph < thershold)
+    data = remove_outliers(data, thershold)
     return data

@@ -9,8 +9,11 @@ from driver_pete_python_sandbox.trajectory_reader import read_compressed_traject
     num_to_date_str_converter
 
 
-
 def fix_trajectory(filename, folder_to_put):
+    '''
+    This function shifts the time 12 hours forward for the trajectory.
+    This was necessary to fix trajectory with am/pm format to 24 hours format of date str.
+    '''
     # http://www.saltycrane.com/blog/2009/05/converting-time-zones-datetime-objects-python/
     traj = read_compressed_trajectory(filename)
     delta = datetime.timedelta(hours=12)

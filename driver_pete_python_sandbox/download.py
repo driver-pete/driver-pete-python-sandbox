@@ -55,5 +55,5 @@ if __name__ == '__main__':
     s3 = S3('driverpete-storage')
     for k in s3.list_keys("Oleg"):
         print(k)
-    #s3.download_folder('Oleg', artifacts)
+    s3.download_folder('Oleg', artifacts)
     

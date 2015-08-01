@@ -10,7 +10,6 @@ from geopy.distance import vincenty
 from driver_pete_python_sandbox.filter_gps import extract_delta_time, compute_velocities, \
     ms_to_mph, filter_gps_data, extract_delta_dist, delta_float_time
 import cPickle
-from geopy.distance import vincenty
 from driver_pete_python_sandbox.gmaps import get_static_google_map
 
 from geopy.geocoders import GoogleV3 as Geocoder

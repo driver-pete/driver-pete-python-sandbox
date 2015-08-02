@@ -58,6 +58,16 @@ def find_endpoints(data):
     return unique_locations
 
 
+def plot_velocity_histogram(data):
+    delta_time = extract_delta_time(data) 
+    velocities = compute_velocities(data)
+    plots.plot(delta_time)
+    plots.show()
+
+    plots.hist(velocities*ms_to_mph, 100)
+    plots.show()
+
+
 def process_gps_data(filename):
     # clean up data
     data = filter_gps_data(read_compressed_trajectory(filename))
@@ -81,16 +91,16 @@ def process_gps_data(filename):
     BtoA_paths = []
     current_path = [current_startpoint, None]
     route_started = False
-    print("Staring from %s" % trajectory_point_to_str(data, current_startpoint))
-    distance_to_start_route = 100
+    #print("Staring from %s" % trajectory_point_to_str(data, current_startpoint))
+    distance_to_start_route = 200
     for i in range(current_startpoint, len(data)):
         if not route_started:
             if are_points_close(data, current_startpoint, i, distance_to_start_route):
                 current_path[0] = i
-                print("Haven't gone far: %s" % trajectory_point_to_str(data, i))
+                #print("Haven't gone far: %s" % trajectory_point_to_str(data, i))
             else:
                 route_started = True
-                print("Ok, started route: %s" % trajectory_point_to_str(data, i))
+                #print("Ok, started route: %s" % trajectory_point_to_str(data, i))
         else:
             if are_points_close(data, current_endpoint, i, distance_to_start_route):
                 # route acomplished:
@@ -98,58 +108,46 @@ def process_gps_data(filename):
                 
                 if current_startpoint_index % 2 == 0:
                     AtoB_paths.append(current_path)
-                    print("Route A to B from %s to %s found." % (trajectory_point_to_str(data, current_path[0]),
-                                                                 trajectory_point_to_str(data, current_path[1])))
+                    #print("Route A to B from %s to %s found." % (trajectory_point_to_str(data, current_path[0]),
+                    #                                             trajectory_point_to_str(data, current_path[1])))
                 else:
                     BtoA_paths.append(current_path)
-                    print("Route B to A from %s to %s found." % (trajectory_point_to_str(data, current_path[0]),
-                                                                 trajectory_point_to_str(data, current_path[1])))
+                    #print("Route B to A from %s to %s found." % (trajectory_point_to_str(data, current_path[0]),
+                    #                                             trajectory_point_to_str(data, current_path[1])))
                 
                 current_startpoint_index = (current_startpoint_index + 1) % 2
                 current_startpoint = endpoints[current_startpoint_index]
                 current_endpoint = endpoints[current_startpoint_index-1]
                 current_path = [i, None]
                 route_started = False
-                print("Staring from %s" % trajectory_point_to_str(data, current_startpoint))
+                #print("Staring from %s" % trajectory_point_to_str(data, i))
             elif are_points_close(data, current_startpoint, i, distance_to_start_route):
                 # we made a loop
-                print("Made a loop from %s to %s" % (trajectory_point_to_str(data, current_path[0]),
-                                                     trajectory_point_to_str(data, i)))
+                #print("Made a loop from %s to %s" % (trajectory_point_to_str(data, current_path[0]),
+                #                                     trajectory_point_to_str(data, i)))
                 current_path = [i, None]
                 route_started = False
-                print("Staring from %s" % trajectory_point_to_str(data, current_startpoint))
+                #print("Staring from %s" % trajectory_point_to_str(data, i))
             
     print(AtoB_paths)
     print(BtoA_paths)          
-    return
-    # candidate paths
-    candidate_paths = [[stationary_points[i], stationary_points[i+1]]
-                       for i in range(len(stationary_points)-1)]
-    paths = [p for p in candidate_paths if not is_index_close(*p)]
+
+    path_indices = BtoA_paths[2]
+    path = data[path_indices[0]:path_indices[1]+1, :]
+    times, coordinates = path[:, 0], path[:, 1:]
     
-    times = [delta_float_time(data[p[0]+1][0], data[p[1]][0])/60 for p in paths]
-
-    print(paths)
-    print(times)
-
-    velocities = compute_velocities(data)
-    plots.plot(delta_time)
-    plots.show()
-
-    plots.hist(velocities*ms_to_mph, 100)
-    plots.show()
-    
-    times, coordinates = data[:, 0], data[:, 1:]
     center = np.average(coordinates, axis=0)
     print(center)
-
-    imgdata = get_static_google_map(#center=center,
-                                    #zoom=14,
-                                    markers=coordinates[90:170])
-
-    cv2.imshow('A', imgdata)
+ 
+    max_markers = 64
+    for i in range(len(coordinates)/max_markers + 1):
+        imgdata = get_static_google_map(#center=center,
+                                        #zoom=11,
+                                        markers=coordinates[i*max_markers:(i+1)*max_markers])
+     
+        cv2.imshow(str(i), imgdata)
     cv2.waitKey()
-    
+     
     plots.plot(coordinates[:,0], coordinates[:,1], 'ro')
     plots.show()
 

@@ -36,13 +36,11 @@ def get_static_google_map(center=None, zoom=12, imgsize=(500,500), imgformat="jp
     if zoom is not None:
         request += "zoom=%i&" % zoom  # zoom 0 (all of the world scale ) to 22 (single buildings scale)
 
-
     request += "size=%ix%i&" % (imgsize)  # tuple of ints, up to 640 by 640
     request += "format=%s&" % imgformat
 
     assert(maptype in ['roadmap', 'satelite', 'hybrid', 'terrain'])
     request += "maptype=%s&" % maptype  # roadmap, satellite, hybrid, terrain
-
 
     # add markers (location and style)
     if markers != None:
@@ -52,11 +50,15 @@ def get_static_google_map(center=None, zoom=12, imgsize=(500,500), imgformat="jp
         marker_str += "&"
         request += marker_str
 
-
     #request += "mobile=false&"  # optional: mobile=true will assume the image is shown on a small screen (mobile device)
     request += "sensor=false&"   # must be given, deals with getting location from mobile device 
     
+    print("Issuing request %s" % request)
     web_sock = urllib.urlopen(request)
-    imgdata = web_sock.read() 
+    code = web_sock.getcode()
+    if code != 200:
+        raise Exception(web_sock.read())
+    
+    imgdata = web_sock.read()
     picture = cv2.imdecode(np.frombuffer(imgdata, np.uint8), 1)    
     return picture

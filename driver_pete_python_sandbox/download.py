@@ -38,6 +38,7 @@ class S3(object):
         result_filename = os.path.join(download_folder,
                                        os.path.split(key_name)[-1])
         k.get_contents_to_filename(result_filename)
+        return result_filename
 
     def download_folder(self, s3_folder, results_folder):
         assert(os.path.exists(results_folder))

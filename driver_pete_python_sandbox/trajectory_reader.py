@@ -52,7 +52,8 @@ def write_compressed_trajectory(trajectory, filename):
 
 
 if __name__ == "__main__":
-    trajectory = read_compressed_trajectory(os.path.expanduser("~/Downloads/trajectory.dp"))
+    artifacts = os.path.join(os.path.dirname(__file__), 'artifacts', 'raw')
+    trajectory = read_compressed_trajectory(os.path.join(artifacts, ))
     write_compressed_trajectory(trajectory, os.path.expanduser("~/Downloads/trajectory_copy.dp"))
     trajectory_copy = read_compressed_trajectory(os.path.expanduser("~/Downloads/trajectory_copy.dp"))
     assert((trajectory == trajectory_copy).all())

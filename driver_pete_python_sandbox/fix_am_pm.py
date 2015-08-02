@@ -29,7 +29,7 @@ def fix_trajectory(filename, folder_to_put):
     write_compressed_trajectory(traj, os.path.join(folder_to_put, result_filename))
 
 
-if __name__ == '__main__':
+def fix_am_pm():
     trajectories_to_fix = ['27-7-2015_08-21-47',
                            '28-7-2015_08-09-00',
                            '29-7-2015_07-16-14',
@@ -41,3 +41,15 @@ if __name__ == '__main__':
     for t in trajectories_to_fix:
         fix_trajectory(os.path.join(artifacts, 'raw', t),
                        os.path.join(artifacts, 'fixed'))
+
+
+
+if __name__ == '__main__':
+    artifacts = os.path.join(os.path.dirname(__file__), 'artifacts')
+    traj = read_compressed_trajectory(os.path.join(artifacts, 'raw', '30-07-2015_20-38-53'))
+    for t in traj:
+        d = num2date(t[0])
+        if d.hour == 0:
+            t[0] = date2num(d - datetime.timedelta(hours=12))
+    
+    write_compressed_trajectory(traj, os.path.join(artifacts, 'fixed', '30-07-2015_20-38-53'))

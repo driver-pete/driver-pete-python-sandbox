@@ -2,6 +2,7 @@ import os
 from driver_pete_python_sandbox.trajectory_reader import read_compressed_trajectory,\
     write_compressed_trajectory
 import numpy as np
+from driver_pete_python_sandbox.filter_gps import extract_delta_time
 
 
 def merge_trajectories(raw_trajectories_folder, results_file):
@@ -13,9 +14,10 @@ def merge_trajectories(raw_trajectories_folder, results_file):
         full_name = os.path.join(raw_trajectories_folder, name)
         contents.append(read_compressed_trajectory(full_name))
      
-    contents.sort(key=lambda p: p[0, 0], reverse=False)   
-
+    contents.sort(key=lambda p: p[0, 0], reverse=False)    
     merged_traj = np.vstack(contents)
+    dt = extract_delta_time(merged_traj)
+    assert((dt > 0).all())
     write_compressed_trajectory(merged_traj, results_file)
     
 

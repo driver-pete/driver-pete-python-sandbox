@@ -68,6 +68,25 @@ def plot_velocity_histogram(data):
     plots.show()
 
 
+def show_path(data, path_indices):
+    path = data[path_indices[0]:path_indices[1]+1, :]
+    times, coordinates = path[:, 0], path[:, 1:]
+    
+    center = np.average(coordinates, axis=0)
+ 
+    max_markers = 64
+    for i in range(len(coordinates)/max_markers + 1):
+        imgdata = get_static_google_map(#center=center,
+                                        #zoom=11,
+                                        markers=coordinates[i*max_markers:(i+1)*max_markers])
+     
+        cv2.imshow(str(i), imgdata)
+    cv2.waitKey()
+     
+    plots.plot(coordinates[:,0], coordinates[:,1], 'ro')
+    plots.show()
+
+
 def process_gps_data(filename):
     # clean up data
     data = filter_gps_data(read_compressed_trajectory(filename))
@@ -91,16 +110,17 @@ def process_gps_data(filename):
     BtoA_paths = []
     current_path = [current_startpoint, None]
     route_started = False
-    #print("Staring from %s" % trajectory_point_to_str(data, current_startpoint))
+    print("Staring from %s" % trajectory_point_to_str(data, current_startpoint))
     distance_to_start_route = 200
+    stationary_threshold = (60*60) * 3  # hours
     for i in range(current_startpoint, len(data)):
         if not route_started:
             if are_points_close(data, current_startpoint, i, distance_to_start_route):
                 current_path[0] = i
-                #print("Haven't gone far: %s" % trajectory_point_to_str(data, i))
+                print("Haven't gone far: %s" % trajectory_point_to_str(data, i))
             else:
                 route_started = True
-                #print("Ok, started route: %s" % trajectory_point_to_str(data, i))
+                print("Ok, started route: %s" % trajectory_point_to_str(data, i))
         else:
             if are_points_close(data, current_endpoint, i, distance_to_start_route):
                 # route acomplished:
@@ -108,49 +128,68 @@ def process_gps_data(filename):
                 
                 if current_startpoint_index % 2 == 0:
                     AtoB_paths.append(current_path)
-                    #print("Route A to B from %s to %s found." % (trajectory_point_to_str(data, current_path[0]),
-                    #                                             trajectory_point_to_str(data, current_path[1])))
+                    print("Route A to B from %s to %s found." % (trajectory_point_to_str(data, current_path[0]),
+                                                                 trajectory_point_to_str(data, current_path[1])))
                 else:
                     BtoA_paths.append(current_path)
-                    #print("Route B to A from %s to %s found." % (trajectory_point_to_str(data, current_path[0]),
-                    #                                             trajectory_point_to_str(data, current_path[1])))
+                    print("Route B to A from %s to %s found." % (trajectory_point_to_str(data, current_path[0]),
+                                                                 trajectory_point_to_str(data, current_path[1])))
                 
                 current_startpoint_index = (current_startpoint_index + 1) % 2
                 current_startpoint = endpoints[current_startpoint_index]
                 current_endpoint = endpoints[current_startpoint_index-1]
                 current_path = [i, None]
                 route_started = False
-                #print("Staring from %s" % trajectory_point_to_str(data, i))
+                print("Staring from %s" % trajectory_point_to_str(data, i))
             elif are_points_close(data, current_startpoint, i, distance_to_start_route):
                 # we made a loop
-                #print("Made a loop from %s to %s" % (trajectory_point_to_str(data, current_path[0]),
-                #                                     trajectory_point_to_str(data, i)))
+                print("Made a loop from %s to %s" % (trajectory_point_to_str(data, current_path[0]),
+                                                     trajectory_point_to_str(data, i)))
                 current_path = [i, None]
                 route_started = False
-                #print("Staring from %s" % trajectory_point_to_str(data, i))
+                print("Staring from %s" % trajectory_point_to_str(data, i))
+            elif delta_float_time(data[i-1, 0], data[i, 0]) > stationary_threshold:
+                # we made a loop
+                print("Ignore stationary point %s" % (trajectory_point_to_str(data, i-1),))
+                current_path = [i, None]
+                route_started = False
+                print("Staring from %s" % trajectory_point_to_str(data, i))
             
     print(AtoB_paths)
     print(BtoA_paths)          
 
-    path_indices = BtoA_paths[2]
-    path = data[path_indices[0]:path_indices[1]+1, :]
-    times, coordinates = path[:, 0], path[:, 1:]
-    
-    center = np.average(coordinates, axis=0)
-    print(center)
- 
-    max_markers = 64
-    for i in range(len(coordinates)/max_markers + 1):
-        imgdata = get_static_google_map(#center=center,
-                                        #zoom=11,
-                                        markers=coordinates[i*max_markers:(i+1)*max_markers])
-     
-        cv2.imshow(str(i), imgdata)
-    cv2.waitKey()
-     
-    plots.plot(coordinates[:,0], coordinates[:,1], 'ro')
-    plots.show()
+    print("ATOB")
+    for p in AtoB_paths:
+        print(delta_float_time(data[p[0], 0], data[p[1], 0])/60)
 
+    print("BTOA")
+    for p in BtoA_paths:
+        print(delta_float_time(data[p[0], 0], data[p[1], 0])/60)
+
+    '''
+    [[77, 265], [438, 608], [779, 946], [1126, 1277]]
+    [[270, 435], [608, 775], [949, 1124], [1426, 1595]]
+    ATOB
+    26.1333333333
+    15.8166666667
+    15.8166666667
+    15.9166666667
+    BTOA
+    16.5833333333
+    611.383333333
+    20.8166666667
+    334.8
+    '''
+    #show_path(data, BtoA_paths[1])
+    path_indices = BtoA_paths[1]
+    path = data[path_indices[0]:path_indices[1]+1, :]
+   
+    for i in range(0, 5):
+        print(trajectory_point_to_str(path, i)) 
+    print('--------------')
+#     for i in range(len(path) - 5, len(path)):
+#         print(trajectory_point_to_str(path, i))
+    
 
 if __name__ == '__main__':
     artifacts = os.path.join(os.path.dirname(__file__), 'artifacts')

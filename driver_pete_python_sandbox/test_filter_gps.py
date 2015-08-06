@@ -12,14 +12,18 @@ import numpy as np
 
 from matplotlib.dates import datestr2num, num2date
 
-from cogo.filter_gps import remove_duplicate_points, compute_velocities,\
-    ms_to_mph, extract_delta_time, extract_delta_dist, remove_outliers
-from cogo.gmaps import get_static_google_map
+from driver_pete_python_sandbox.trajectory_reader import read_compressed_trajectory
+import tempfile
+from driver_pete_python_sandbox.download import S3
+from driver_pete_python_sandbox.filter_gps import compute_velocities,\
+    remove_duplicate_points, ms_to_mph, remove_outliers, filter_gps_data
 
 
 def _get_test_data():
-    filename = os.path.join(os.path.dirname(__file__), 'test_outliers_data.pkl')
-    return pickle.load(open(filename))
+    folder = tempfile.mkdtemp()
+    s3 = S3('driverpete-storage')
+    filename = s3.download("_testing/testing_raw_0", folder)
+    return read_compressed_trajectory(filename)
 
 
 def test_remove_duplicate_readings():
@@ -46,6 +50,14 @@ def test_remove_outliers():
       
     assert(fixed_data.shape[0] == data.shape[0] - len(outliers))
 
+
+def test_filter_gps():
+    original_data = _get_test_data()
+    data = filter_gps_data(original_data)
+    assert(len(original_data)-len(data) == 7)
+    
     
 if __name__ == '__main__':
     test_remove_duplicate_readings()
+    test_remove_outliers()
+    test_filter_gps()

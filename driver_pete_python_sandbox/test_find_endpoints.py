@@ -4,10 +4,9 @@ from driver_pete_python_sandbox.trajectory_reader import read_compressed_traject
 from driver_pete_python_sandbox.filter_gps import filter_gps_data,\
     remove_stationary_points
 from driver_pete_python_sandbox.find_enpoints_procedural import find_endpoints
-from driver_pete_python_sandbox.find_routes_procedural import find_routes
 
 
-def test_finding_paths():
+def test_find_endpoints_procedural():
     folder = tempfile.mkdtemp()
     s3 = S3('driverpete-storage')
     filename = s3.download("_testing/testing_merged_0", folder)
@@ -20,12 +19,6 @@ def test_finding_paths():
     assert(len(endpoints) == 2)
     assert(endpoints == [0, 267])
 
-    AtoB_paths, BtoA_paths = find_routes(data, endpoints)
-    print(AtoB_paths)
-    print(BtoA_paths)
-    assert(AtoB_paths == [[78, 265], [439, 608], [780, 946], [1127, 1277]])
-    assert(BtoA_paths == [[271, 435], [611, 775], [950, 1124], [1429, 1595]])
-
 
 if __name__ == '__main__':
-    test_finding_paths()
+    test_find_endpoints_procedural()

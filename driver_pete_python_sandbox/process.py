@@ -62,7 +62,7 @@ def process_gps_data(filename):
     334.8
     '''
     show_path(data, AtoB_paths[6])
-    #show_path(data, BtoA_paths[0])
+    # show_path(data, BtoA_paths[0])
     path_indices = AtoB_paths[1]
     path = data[path_indices[0]:path_indices[1]+1, :]
    
@@ -76,4 +76,3 @@ def process_gps_data(filename):
 if __name__ == '__main__':
     artifacts = os.path.join(os.path.dirname(__file__), 'artifacts')
     process_gps_data(os.path.join(artifacts, 'merged'))
-

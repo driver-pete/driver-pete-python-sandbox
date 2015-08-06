@@ -16,16 +16,16 @@ class S3(object):
         if not os.path.exists(security_file):
             raise Exception("Please put security.properties file in the same folder with this script")
         
-        #http://stackoverflow.com/questions/9686184/is-there-a-version-of-configparser-that-deals-with-files-with-no-section-headers
+        # http://stackoverflow.com/questions/9686184/is-there-a-version-of-configparser-that-deals-with-files-with-no-section-headers
         config = ConfigParser.ConfigParser()
-        config.readfp(StringIO(u'[DUMMY]\n%s'  % open(security_file).read()))
+        config.readfp(StringIO(u'[DUMMY]\n%s' % open(security_file).read()))
         config = dict(config.items('DUMMY'))
 
         self._connection = S3Connection(config['aws_access_key_id'], config['aws_secret_key'])
         self._bucket = self._connection.get_bucket(bucket_name)
     
     def list_keys(self, prefix=None):
-        #http://stackoverflow.com/questions/9954521/s3-boto-list-keys-sometimes-returns-directory-key
+        # http://stackoverflow.com/questions/9954521/s3-boto-list-keys-sometimes-returns-directory-key
         keys = []
         for k in self._bucket.get_all_keys(prefix=prefix):
             if prefix is not None and k.name in [prefix, prefix+'/']:
@@ -57,4 +57,3 @@ if __name__ == '__main__':
     for k in s3.list_keys("Oleg"):
         print(k)
     s3.download_folder('Oleg', artifacts)
-    

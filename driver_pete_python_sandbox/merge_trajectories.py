@@ -8,7 +8,7 @@ from driver_pete_python_sandbox.filter_gps import extract_delta_time,\
 
 def merge_trajectories(raw_trajectories_folder, results_file):
     onlyfiles = [f for f in os.listdir(raw_trajectories_folder)
-                 if os.path.isfile(os.path.join(raw_trajectories_folder, f)) ]
+                 if os.path.isfile(os.path.join(raw_trajectories_folder, f))]
     
     contents = []
     for name in onlyfiles:

@@ -43,7 +43,6 @@ def fix_am_pm():
                        os.path.join(artifacts, 'fixed'))
 
 
-
 if __name__ == '__main__':
     artifacts = os.path.join(os.path.dirname(__file__), 'artifacts')
     traj = read_compressed_trajectory(os.path.join(artifacts, 'raw', '30-07-2015_20-38-53'))

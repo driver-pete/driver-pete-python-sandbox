@@ -14,7 +14,7 @@ from matplotlib.dates import datestr2num, num2date
 import matplotlib.pyplot as plots
 
 
-def get_static_google_map(center=None, zoom=12, imgsize=(500,500), imgformat="jpg",
+def get_static_google_map(center=None, zoom=12, imgsize=(500, 500), imgformat="jpg",
                           maptype="roadmap", markers=None):  
     """retrieve a map (image) from the static google maps server 
     
@@ -22,11 +22,11 @@ def get_static_google_map(center=None, zoom=12, imgsize=(500,500), imgformat="jp
         
         Creates a request string with a URL like this:
         http://maps.google.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=14&size=512x512&maptype=roadmap
-&markers=color:blue|label:S|40.702147,-74.015794&sensor=false"""
-   
-    
+&markers=color:blue|label:S|40.702147,-74.015794&sensor=false
+    """
+
     # assemble the URL
-    request =  "http://maps.google.com/maps/api/staticmap?" # base URL, append query params, separated by &
+    request = "http://maps.google.com/maps/api/staticmap?"  # base URL, append query params, separated by &
    
     # if center and zoom  are not given, the map will show all marker locations
     if center is not None:
@@ -46,14 +46,14 @@ def get_static_google_map(center=None, zoom=12, imgsize=(500,500), imgformat="jp
     request += "maptype=%s&" % maptype  # roadmap, satellite, hybrid, terrain
 
     # add markers (location and style)
-    if markers != None:
+    if markers is not None:
         marker_str = "markers=color:red|size:tiny|"
         for m in markers:
             marker_str += '%f %f|' % tuple(m)
         marker_str += "&"
         request += marker_str
 
-    #request += "mobile=false&"  # optional: mobile=true will assume the image is shown on a small screen (mobile device)
+    # request += "mobile=false&"  # optional: mobile=true will assume the image is shown on a small screen (mobile device)
     request += "sensor=false&"   # must be given, deals with getting location from mobile device 
     
     print("Issuing request %s" % request)
@@ -77,7 +77,7 @@ def trajectory_point_to_str(data, index):
     except IndexError:
         duration = "NO DATA"
     return "Index:%s; Date:%s; Address:%s; Coords: %s; Duration:%s;" % \
-            (index, date, request, address, duration)
+        (index, date, request, address, duration)
 
 
 def show_path(data, path_indices):
@@ -88,12 +88,14 @@ def show_path(data, path_indices):
  
     max_markers = 64
     for i in range(len(coordinates)/max_markers + 1):
-        imgdata = get_static_google_map(#center=center,
-                                        #zoom=11,
-                                        markers=coordinates[i*max_markers:(i+1)*max_markers])
+        imgdata = get_static_google_map(
+            markers=coordinates[i*max_markers:(i+1)*max_markers]
+            # center=center,
+            # zoom=11,
+        )
      
         cv2.imshow(str(i), imgdata)
     cv2.waitKey()
      
-    plots.plot(coordinates[:,0], coordinates[:,1], 'ro')
+    plots.plot(coordinates[:, 0], coordinates[:, 1], 'ro')
     plots.show()

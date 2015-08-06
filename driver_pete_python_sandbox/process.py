@@ -102,8 +102,8 @@ def find_routes(data, endpoints, verbose=False):
     stationary_threshold = (60*60) * 3  # hours
     for i in range(current_startpoint, len(data)):
         if not route_started:
+            current_path[0] = i
             if are_points_close(data, current_startpoint, i, distance_to_start_route):
-                current_path[0] = i
                 if verbose:
                     print("Haven't gone far: %s" % trajectory_point_to_str(data, i))
             else:
@@ -168,7 +168,7 @@ def process_gps_data(filename):
     for u in endpoints:
         print(trajectory_point_to_str(data, u))
 
-    AtoB_paths, BtoA_paths = find_routes(data, endpoints)
+    AtoB_paths, BtoA_paths = find_routes(data, endpoints, verbose=False)
     print(AtoB_paths)
     print(BtoA_paths)
 
@@ -194,11 +194,12 @@ def process_gps_data(filename):
     20.8166666667
     334.8
     '''
-    #show_path(data, BtoA_paths[1])
-    path_indices = BtoA_paths[1]
+    show_path(data, AtoB_paths[6])
+    #show_path(data, BtoA_paths[0])
+    path_indices = AtoB_paths[1]
     path = data[path_indices[0]:path_indices[1]+1, :]
    
-    for i in range(0, 5):
+    for i in range(10, 20):
         print(trajectory_point_to_str(path, i)) 
     print('--------------')
 #     for i in range(len(path) - 5, len(path)):

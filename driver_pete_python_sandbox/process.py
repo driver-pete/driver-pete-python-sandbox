@@ -158,9 +158,6 @@ def process_gps_data(filename):
     # clean up data
     data = filter_gps_data(read_compressed_trajectory(filename))
     print("Length of data: %d" % len(data)) 
-    
-    # merge points which are closer than 50m 
-    data = remove_stationary_points(data, distance_threshold=50)
 
     endpoints = find_endpoints(data)
     assert(len(endpoints) == 2)

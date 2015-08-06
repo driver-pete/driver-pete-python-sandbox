@@ -21,9 +21,10 @@ def test_finding_paths():
     assert(endpoints == [0, 267])
 
     AtoB_paths, BtoA_paths = find_routes(data, endpoints)
-    print(AtoB_paths, BtoA_paths)
-    assert(AtoB_paths == [[77, 265], [438, 608], [779, 946], [1126, 1277]])
-    assert(BtoA_paths == [[270, 435], [610, 775], [949, 1124], [1428, 1595]])
+    print(AtoB_paths)
+    print(BtoA_paths)
+    assert(AtoB_paths == [[78, 265], [439, 608], [780, 946], [1127, 1277]])
+    assert(BtoA_paths == [[271, 435], [611, 775], [950, 1124], [1429, 1595]])
 
 
 if __name__ == '__main__':

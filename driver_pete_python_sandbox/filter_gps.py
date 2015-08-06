@@ -115,3 +115,8 @@ def filter_gps_data(data, speed_mph_thershold=85, stationary_distance_threshold=
     data = remove_stationary_points(data, stationary_distance_threshold)
     data = remove_outliers(data, speed_mph_thershold)
     return data
+
+
+def are_points_close(data, index1, index2, distance):
+    # predicate to determine if two points are close based on index in the trajectory
+    return vincenty(data[index1][1:], data[index2][1:]).meters < distance

@@ -9,6 +9,9 @@
 import cv2
 import urllib
 import numpy as np
+from geopy.geocoders import GoogleV3 as Geocoder
+from matplotlib.dates import datestr2num, num2date
+import matplotlib.pyplot as plots
 
 
 def get_static_google_map(center=None, zoom=12, imgsize=(500,500), imgformat="jpg",
@@ -62,3 +65,35 @@ def get_static_google_map(center=None, zoom=12, imgsize=(500,500), imgformat="jp
     imgdata = web_sock.read()
     picture = cv2.imdecode(np.frombuffer(imgdata, np.uint8), 1)    
     return picture
+
+
+def trajectory_point_to_str(data, index):
+    geocoder = Geocoder()
+    request = "%s, %s" % tuple(data[index][1:])
+    address = geocoder.reverse(request, exactly_one = True).address
+    date = num2date(data[index][0])
+    try:
+        duration = num2date(data[index+1][0]) - date
+    except IndexError:
+        duration = "NO DATA"
+    return "Index:%s; Date:%s; Address:%s; Coords: %s; Duration:%s;" % \
+            (index, date, request, address, duration)
+
+
+def show_path(data, path_indices):
+    path = data[path_indices[0]:path_indices[1]+1, :]
+    times, coordinates = path[:, 0], path[:, 1:]
+    
+    center = np.average(coordinates, axis=0)
+ 
+    max_markers = 64
+    for i in range(len(coordinates)/max_markers + 1):
+        imgdata = get_static_google_map(#center=center,
+                                        #zoom=11,
+                                        markers=coordinates[i*max_markers:(i+1)*max_markers])
+     
+        cv2.imshow(str(i), imgdata)
+    cv2.waitKey()
+     
+    plots.plot(coordinates[:,0], coordinates[:,1], 'ro')
+    plots.show()

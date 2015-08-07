@@ -13,15 +13,20 @@ class S3(object):
     '''
     def __init__(self, bucket_name):    
         security_file = os.path.join(os.path.dirname(__file__), 'security.properties')
-        if not os.path.exists(security_file):
-            raise Exception("Please put security.properties file in the same folder with this script")
-        
-        # http://stackoverflow.com/questions/9686184/is-there-a-version-of-configparser-that-deals-with-files-with-no-section-headers
-        config = ConfigParser.ConfigParser()
-        config.readfp(StringIO(u'[DUMMY]\n%s' % open(security_file).read()))
-        config = dict(config.items('DUMMY'))
+        if os.path.exists(security_file):
+            # http://stackoverflow.com/questions/9686184/is-there-a-version-of-configparser-that-deals-with-files-with-no-section-headers
+            config = ConfigParser.ConfigParser()
+            config.readfp(StringIO(u'[DUMMY]\n%s' % open(security_file).read()))
+            config = dict(config.items('DUMMY'))
+            aws_access_key_id = config['aws_access_key_id']
+            aws_secret_key = config['aws_secret_key'] 
+        elif 'AWS_ACCESS_KEY_ID' in os.environ['HOME'] and 'AWS_SECRET_KEY' in os.environ['HOME']:
+            aws_access_key_id = config['AWS_ACCESS_KEY_ID']
+            aws_secret_key = config['AWS_SECRET_KEY'] 
+        else:
+            raise Exception("Please put security.properties file in the same folder with this script or define AWS system variables")
 
-        self._connection = S3Connection(config['aws_access_key_id'], config['aws_secret_key'])
+        self._connection = S3Connection(aws_access_key_id, aws_secret_key)
         self._bucket = self._connection.get_bucket(bucket_name)
     
     def list_keys(self, prefix=None):

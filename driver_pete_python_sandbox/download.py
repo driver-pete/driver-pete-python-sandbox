@@ -20,9 +20,9 @@ class S3(object):
             config = dict(config.items('DUMMY'))
             aws_access_key_id = config['aws_access_key_id']
             aws_secret_key = config['aws_secret_key'] 
-        elif 'AWS_ACCESS_KEY_ID' in os.environ['HOME'] and 'AWS_SECRET_KEY' in os.environ['HOME']:
-            aws_access_key_id = config['AWS_ACCESS_KEY_ID']
-            aws_secret_key = config['AWS_SECRET_KEY'] 
+        elif 'AWS_ACCESS_KEY_ID' in os.environ and 'AWS_SECRET_KEY' in os.environ:
+            aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID']
+            aws_secret_key = os.environ['AWS_SECRET_KEY'] 
         else:
             raise Exception("Please put security.properties file in the same folder with this script or define AWS system variables")
 

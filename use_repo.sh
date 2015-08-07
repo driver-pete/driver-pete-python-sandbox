@@ -47,3 +47,9 @@ robustus --cache ~/.robustus_rc/wheelhouse env $VENV
 # install this folder in developer mode
 echo "Running robustus with options '$ROBUSTUS_OPTIONS'"
 robustus install -e . $ROBUSTUS_OPTIONS
+
+# If you can not compile opencv on mac, there is a workaround to use brew opencv
+# brew tap homebrew/science
+# brew install opencv
+# cp /usr/local/lib/python2.7/site-packages/cv* venv/lib/python2.7/site-packages/
+

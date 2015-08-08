@@ -2,12 +2,14 @@
 __pycache__/
 *.py[cod]
 
+
 # C extensions
 *.so
 
 # Distribution / packaging
 .Python
 env/
+venv/
 build/
 develop-eggs/
 dist/
@@ -55,3 +57,7 @@ docs/_build/
 
 # PyBuilder
 target/
+
+.project
+.pydevproject
+.DS_Store

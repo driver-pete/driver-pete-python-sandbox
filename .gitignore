@@ -61,3 +61,4 @@ target/
 .project
 .pydevproject
 .DS_Store
+.settings

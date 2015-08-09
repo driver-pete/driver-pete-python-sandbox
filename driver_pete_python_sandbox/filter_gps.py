@@ -71,10 +71,14 @@ def remove_outliers_impl(data, thershold=85):
     This leads to huge car velocity at the next sample.
     The solution is to just remove such samples from the data based on the big velocity (>thershold).
     thershold - velocity that is considered to be too big (in mph)
+    
+    This method is problematic if you have a large pause in recordings:
+        the first sample after pause can be noise and can be got from far away:
+        it will not be considered as noise because velocity will be still smal because of large time.
     '''
     velocities = compute_velocities(data)
-    outliers = np.where(velocities*ms_to_mph > 85)[0]
-    return np.delete(data, outliers, axis=0)
+    outliers = np.where(velocities*ms_to_mph > thershold)[0]
+    return np.delete(data, outliers + 1, axis=0)
 
 
 def remove_outliers(data, thershold=85):

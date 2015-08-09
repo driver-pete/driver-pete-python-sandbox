@@ -37,15 +37,40 @@ class VelocityOutliersFilter(object):
     '''
     remove_outliers
     '''
-    def __init__(self, speed_mph_thershold=85.):
-        self._threshold = speed_mph_thershold
+    def __init__(self, speed_mph_thershold=85., distance_threshold=5000.):
+        self._speed_threshold = speed_mph_thershold
+        self._distance_threshold = distance_threshold
+        
+        self._max_number_outliers = 3
+        self._outliers_counter = self._max_number_outliers
     
     def allow(self, current_p, next_p):
         dist = vincenty(current_p[1:], next_p[1:]).meters
         dt = delta_float_time(current_p[0], next_p[0])
         v = ms_to_mph*dist/dt
         print(v, dt, dist, trajectory_point_to_str([current_p], 0), trajectory_point_to_str([next_p], 0))
-        return v <= self._threshold
+        if v > self._speed_threshold:
+            print('large speed')
+            if self._outliers_counter > 0:
+                print('Counter > 0', self._outliers_counter)
+                self._outliers_counter -= 1
+                return False
+  
+        if dist > self._distance_threshold:
+            print('large distance')
+            if self._outliers_counter > 0:
+                print('Counter > 0', self._outliers_counter)
+                self._outliers_counter -= 1
+                return False
+        print("Counter reset")
+        self._outliers_counter = self._max_number_outliers
+        return True
+
+    def get_state(self):
+        return self._outliers_counter
+
+    def set_state(self, state):
+        self._outliers_counter = state
 
 
 def apply_filter(data, afilter):
@@ -55,6 +80,5 @@ def apply_filter(data, afilter):
         if afilter.allow(prev_point, data[i]):
             prev_point = data[i]
             result.append(data[i])
-        else:
-            print('filter', i)
+
     return np.array(result)

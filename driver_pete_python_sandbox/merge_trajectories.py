@@ -2,8 +2,9 @@ import os
 from driver_pete_python_sandbox.trajectory_reader import read_compressed_trajectory,\
     write_compressed_trajectory
 import numpy as np
-from driver_pete_python_sandbox.filter_gps import extract_delta_time,\
-    remove_duplicate_points
+from driver_pete_python_sandbox.filter_gps import extract_delta_time
+from driver_pete_python_sandbox.filter_gps_processor import apply_filter,\
+    DuplicateTimeFilter
 
 
 def merge_trajectories(raw_trajectories_folder, results_file):
@@ -17,7 +18,7 @@ def merge_trajectories(raw_trajectories_folder, results_file):
      
     contents.sort(key=lambda p: p[0, 0], reverse=False)    
     merged_traj = np.vstack(contents)
-    merged_traj = remove_duplicate_points(merged_traj)
+    merged_traj = apply_filter(merged_traj, DuplicateTimeFilter())
     dt = extract_delta_time(merged_traj)
     assert((dt > 0).all())
     write_compressed_trajectory(merged_traj, results_file)

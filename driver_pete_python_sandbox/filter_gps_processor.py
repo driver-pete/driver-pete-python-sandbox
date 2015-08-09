@@ -14,7 +14,7 @@ from driver_pete_python_sandbox.gmaps import trajectory_point_to_str
 
 class DuplicateTimeFilter(object):
     '''
-    implements remove_duplicate_points
+    Remove gps readings made at the same time - duplicates
     '''
     def allow(self, current_p, next_p):
         dt = delta_float_time(current_p[0], next_p[0])
@@ -26,7 +26,9 @@ class DuplicateTimeFilter(object):
 
 class StationaryPointsFilter(object):
     '''
-    implements remove_stationary_points
+    If coordinates are not changing, there is no need to keep the record because
+    timestamp can always show how long did we spend at that place
+    distance_threshold - which points consider to be close
     '''
     def __init__(self, distance_threshold=1.):
         self._stationary_distance_threshold = distance_threshold

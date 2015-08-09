@@ -3,8 +3,7 @@ import os
 
 import cv2
 from driver_pete_python_sandbox.filter_gps import extract_delta_time, compute_velocities, \
-    ms_to_mph, extract_delta_dist, delta_float_time, \
-    remove_stationary_points
+    ms_to_mph, extract_delta_dist, delta_float_time
 from driver_pete_python_sandbox.find_enpoints_procedural import find_endpoints
 from driver_pete_python_sandbox.find_routes_procedural import find_routes
 from driver_pete_python_sandbox.gmaps import get_static_google_map, \

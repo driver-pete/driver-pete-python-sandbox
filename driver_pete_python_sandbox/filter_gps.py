@@ -50,7 +50,7 @@ def remove_duplicate_points(data):
     '''
     delta_time = extract_delta_time(data)
     # remove all entries that has dt less than 1 second
-    result = np.delete(data, np.where(delta_time < 1.)[0], axis=0)
+    result = np.delete(data, np.where(delta_time < 1.)[0] + 1, axis=0)
     print("Removed %d duplicate points." % (len(data) - len(result)))
     return result
 

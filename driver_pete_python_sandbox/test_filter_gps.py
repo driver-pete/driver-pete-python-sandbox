@@ -49,41 +49,24 @@ def test_remove_duplicate_readings():
  
 def test_remove_outliers():
     np.set_printoptions(suppress=True)
-    data = remove_duplicate_points(_get_test_data())[561:576]
+    data = remove_duplicate_points(_get_test_data())
+ 
+    velocity_threshold = 85.
+    fixed_data = apply_filter(data, VelocityOutliersFilter(velocity_threshold))
     
+    # check that data has outliers in velocity and distance
     velocities = compute_velocities(data)
     outliers = np.where(velocities*ms_to_mph > 85)[0]
- 
-    fixed_data = remove_outliers(data)
-    fixed_velocities = compute_velocities(fixed_data)
-    fixed_outliers = np.where(fixed_velocities*ms_to_mph > 85)[0]
-    assert(len(fixed_outliers) == 0)
-       
-    #assert(fixed_data.shape[0] == data.shape[0] - len(outliers))
-    
-    delta_time = extract_delta_time(data)
-    delta_dist = extract_delta_dist(data)
-    print('------ORIGINAL--------')
-    for i in range(data.shape[0]-1):
-        print("%s: ds: %s, v: %s" % (trajectory_point_to_str(data, i), delta_dist[i], velocities[i]*ms_to_mph))
+    assert(len(outliers)>0)
+    assert(np.amax(extract_delta_dist(data)) > 157900)
 
-    print('Outliers:')
-    print(outliers)
-   
-#     print('-----BATCH--------')
-#     for d in fixed_data:
-#         print(trajectory_point_to_str([d], 0)) 
+    # no large velocities left
+    velocities = compute_velocities(fixed_data) 
+    assert(np.amax(velocities)*ms_to_mph < velocity_threshold)
+    assert(np.amax(extract_delta_dist(fixed_data)) < 316)
     
-    
-    print('-----PROCESSOR--------')
-    fixed_data_processor = apply_filter(data, VelocityOutliersFilter(85))
-    for d in fixed_data_processor:
-        print(trajectory_point_to_str([d], 0)) 
-
-    
-#     for d in fixed_data:
-#         print(trajectory_point_to_str([d], 0))
-    #assert(fixed_data_processor.shape[0] == data.shape[0] - len(outliers))
+    # we expect 5 point to be removed
+    assert(data.shape[0] - fixed_data.shape[0] == 5)
 
 
 def test_remove_stationary_noise():
@@ -129,7 +112,7 @@ def test_filter_gps():
     
 if __name__ == '__main__':
     #test_remove_duplicate_readings()
-    #test_remove_outliers()
+    test_remove_outliers()
     #test_filter_gps()
-    test_remove_stationary_noise()
-    test_remove_stationary_noise_return_to_stable()
+    #test_remove_stationary_noise()
+    #test_remove_stationary_noise_return_to_stable()

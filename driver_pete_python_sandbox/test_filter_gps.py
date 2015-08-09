@@ -109,6 +109,7 @@ def test_remove_stationary_noise_return_to_stable():
     distances = np.array([vincenty(stationary_point, d[1:]).meters
                           for d in fixed_data])
 
+    # filter converged after 4 steps
     assert((distances[:4] > 157000).all())
     assert((distances[4:] < 246.6).all())
     

@@ -27,4 +27,5 @@ def test_trajectory_reader_2():
 
 
 if __name__ == '__main__':
+    test_trajectory_reader()
     test_trajectory_reader_2()

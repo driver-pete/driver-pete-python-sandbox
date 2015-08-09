@@ -18,6 +18,7 @@ from driver_pete_python_sandbox.filter_gps import compute_velocities,\
 from driver_pete_python_sandbox.filter_gps_processor import apply_filter,\
     DuplicateTimeFilter, VelocityOutliersFilter
 from driver_pete_python_sandbox.gmaps import trajectory_point_to_str
+from geopy.distance import vincenty
  
  
 def _get_test_data():
@@ -83,7 +84,42 @@ def test_remove_outliers():
 #     for d in fixed_data:
 #         print(trajectory_point_to_str([d], 0))
     #assert(fixed_data_processor.shape[0] == data.shape[0] - len(outliers))
- 
+
+
+def test_remove_stationary_noise():
+    '''
+    The data has large amount of noise - switching between SD and LA every 10 seconds.
+    It starts from SD, then noise, later it returns to SD. We test that LA is ignored
+    '''
+    data = remove_duplicate_points(_get_test_data())[561:576]
+
+    fixed_data = apply_filter(data, VelocityOutliersFilter(85))
+    
+    stationary_point = [33.004964, -117.060207]
+    distances = np.array([vincenty(stationary_point, d[1:]).meters
+                          for d in fixed_data])
+    
+    assert((distances < 246.6).all())
+
+
+def test_remove_stationary_noise_return_to_stable():
+    '''
+    The data has large amount of noise - switching between SD and LA every 10 seconds.
+    It starts from the noisy point, later it returns to SD.
+    Here we test that even if data starts with noisy value, we still converge
+    to stable point
+    '''
+    data = remove_duplicate_points(_get_test_data())[563:576]
+
+    fixed_data = apply_filter(data, VelocityOutliersFilter(85))
+    
+    stationary_point = [33.004964, -117.060207]
+    distances = np.array([vincenty(stationary_point, d[1:]).meters
+                          for d in fixed_data])
+
+    assert((distances[:4] > 157000).all())
+    assert((distances[4:] < 246.6).all())
+    
  
 def test_filter_gps():
     original_data = _get_test_data()
@@ -93,5 +129,7 @@ def test_filter_gps():
     
 if __name__ == '__main__':
     #test_remove_duplicate_readings()
-    test_remove_outliers()
+    #test_remove_outliers()
     #test_filter_gps()
+    test_remove_stationary_noise()
+    test_remove_stationary_noise_return_to_stable()

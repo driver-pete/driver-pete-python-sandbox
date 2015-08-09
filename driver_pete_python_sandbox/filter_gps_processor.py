@@ -48,7 +48,7 @@ class VelocityOutliersFilter(object):
         dist = vincenty(current_p[1:], next_p[1:]).meters
         dt = delta_float_time(current_p[0], next_p[0])
         v = ms_to_mph*dist/dt
-        print(v, dt, dist, trajectory_point_to_str([current_p], 0), trajectory_point_to_str([next_p], 0))
+        #print(v, dt, dist, trajectory_point_to_str([current_p], 0), trajectory_point_to_str([next_p], 0))
         if v > self._speed_threshold:
             print('large speed')
             if self._outliers_counter > 0:

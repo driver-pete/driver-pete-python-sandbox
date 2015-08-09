@@ -14,3 +14,18 @@ def test_trajectory_reader():
     write_compressed_trajectory(trajectory, os.path.join(folder, 'trajectory_copy'))
     trajectory_copy = read_compressed_trajectory(os.path.join(folder, 'trajectory_copy'))
     assert((trajectory == trajectory_copy).all())
+
+
+def test_trajectory_reader_2():
+    folder = tempfile.mkdtemp()
+    s3 = S3('driverpete-storage')
+    filename = s3.download("_testing/testing_raw_0", folder)
+    trajectory = read_compressed_trajectory(filename)         
+    write_compressed_trajectory(trajectory, os.path.join(folder, 'trajectory_copy'))
+    trajectory_copy = read_compressed_trajectory(os.path.join(folder, 'trajectory_copy'))
+    assert((trajectory == trajectory_copy).all())
+
+
+if __name__ == '__main__':
+    test_trajectory_reader()
+    test_trajectory_reader_2()

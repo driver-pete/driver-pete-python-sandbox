@@ -11,7 +11,7 @@ from geopy.distance import vincenty
 
 def date_str_to_num_converter(date):
     '''
-    Incoming date is in the format:
+    Incoming date is in the format with the day first:
     27-7-2015_08-01-58
     
     Dateutil expects date in 27-07-2015 09:54:12
@@ -20,7 +20,7 @@ def date_str_to_num_converter(date):
     d, t = date.split('_')
     t = t.replace('-', ':')
     result = ' '.join([d, t])
-    dt = dateutil.parser.parse(result)
+    dt = dateutil.parser.parse(result, dayfirst=True)
     return date2num(dt)
 
 

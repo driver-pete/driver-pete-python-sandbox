@@ -50,55 +50,12 @@ def remove_duplicate_points(data):
     '''
     delta_time = extract_delta_time(data)
     # remove all entries that has dt less than 1 second
-    result = np.delete(data, np.where(delta_time < 1.)[0], axis=0)
+    result = np.delete(data, np.where(delta_time < 1.)[0] + 1, axis=0)
     print("Removed %d duplicate points." % (len(data) - len(result)))
     return result
 
 
-def remove_outliers_impl(data, thershold=85):
-    '''
-    Typical bad gps samples look like this:
-    i  time     long.         lat      dt   ds      v (mph)       
-    1  t1     32.994390  -117.084058  6.0  134.3   75.
-    2  t2     32.994390  -117.084058  4.0  0.0     0.0
-    3  t3     32.991641  -117.083729e 5.0  306.4   171.
-    
-    Where dt - time from the previous sample, ds - distance from the previous sample in meters,
-    v - current velocity based on the current and the previous sample.
-    
-    These readings were taken on the freeway. There is a sample that has the same long, lat. readings
-    but different time. It looks like the car did not move at t2 and then suddenly jumped to location at t3.
-    This leads to huge car velocity at the next sample.
-    The solution is to just remove such samples from the data based on the big velocity (>thershold).
-    thershold - velocity that is considered to be too big (in mph)
-    '''
-    velocities = compute_velocities(data)
-    outliers = np.where(velocities*ms_to_mph > 85)[0]
-    return np.delete(data, outliers, axis=0)
-
-
-def remove_outliers(data, thershold=85):
-    '''
-    see remove_outliers_impl first.
-    It is probable that bad gps samples might come in sequence.
-    in this case we just do several passes of removing outliers
-    '''
-    total_removed = 0
-    while True:
-        result = remove_outliers_impl(data, thershold)
-        outliers_removed = (len(data) - len(result))
-        total_removed += outliers_removed
-        if outliers_removed == 0:
-            print("Removed %d outliers." % total_removed)
-            # check that there are no huge velocities left
-            velocities = compute_velocities(result) 
-            assert(np.amax(velocities)*ms_to_mph < thershold)
-            return result
-        else:
-            data = result
-
-
-def remove_stationary_points(data, distance_threshold):
+def remove_stationary_points(data, distance_threshold=1.):
     '''
     If coordinates are not changing, there is no need to keep the record because
     timestamp can always show how long did we spend at that place
@@ -108,13 +65,6 @@ def remove_stationary_points(data, distance_threshold):
     result = np.delete(data, np.where(delta_dist < distance_threshold)[0] + 1, axis=0)
     print("Removed %d stationary points." % (len(data) - len(result)))
     return result
-
-
-def filter_gps_data(data, speed_mph_thershold=85, stationary_distance_threshold=1.):
-    data = remove_duplicate_points(data)
-    data = remove_stationary_points(data, stationary_distance_threshold)
-    data = remove_outliers(data, speed_mph_thershold)
-    return data
 
 
 def are_points_close(data, index1, index2, distance):

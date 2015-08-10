@@ -5,8 +5,8 @@ import numpy as np
 from matplotlib.dates import date2num, num2date
 import dateutil
 from driver_pete_python_sandbox.filter_gps import extract_delta_dist,\
-    extract_delta_time, compute_velocities, ms_to_mph
-from geopy.distance import vincenty
+    extract_delta_time, compute_velocities
+from driver_pete_python_sandbox.utilities import distance
 
 
 def date_str_to_num_converter(date):
@@ -57,12 +57,3 @@ def write_compressed_trajectory(trajectory, filename):
 if __name__ == "__main__":
     artifacts = os.path.join(os.path.dirname(__file__), 'artifacts', 'raw')
     data = read_compressed_trajectory(os.path.join(artifacts, '04-08-2015_15-46-42'))
-    print(data)
-    dx = extract_delta_dist(data)
-    print(dx)
-    print(extract_delta_time(data))
-    
-    times, coordinates = data[:, 0], data[:, 1:]
-    center = np.average(coordinates, axis=0)
-    print([vincenty(coordinates[i], coordinates[0]).meters for i in range(data.shape[0])])
-    print(compute_velocities(data)*ms_to_mph)

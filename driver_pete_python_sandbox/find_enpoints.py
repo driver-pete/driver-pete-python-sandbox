@@ -1,6 +1,6 @@
-from geopy.distance import vincenty
 
 from driver_pete_python_sandbox.filter_gps import delta_float_time
+from driver_pete_python_sandbox.utilities import distance
 
 
 class FindEndpoints(object):
@@ -26,8 +26,7 @@ class FindEndpoints(object):
 
     def _is_endpoint_exists(self, endpoint):
         for e in self._endpoints:
-            dist = vincenty(self._prev_point[1:], e[1:]).meters
-            if dist < self._endpoints_distance:
+            if distance(self._prev_point, e) < self._endpoints_distance:
                 return True
         return False
             

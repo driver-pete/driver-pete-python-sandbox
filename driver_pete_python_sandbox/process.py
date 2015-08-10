@@ -3,7 +3,7 @@ import os
 
 import cv2
 from driver_pete_python_sandbox.filter_gps import extract_delta_time, compute_velocities, \
-    ms_to_mph, extract_delta_dist, delta_float_time
+    extract_delta_dist, delta_float_time
 
 from driver_pete_python_sandbox.gmaps import get_static_google_map, \
     trajectory_point_to_str, show_path
@@ -14,6 +14,7 @@ from driver_pete_python_sandbox.filter_gps_processor import filter_gps_data
 from driver_pete_python_sandbox.find_enpoints import find_endpoints
 from driver_pete_python_sandbox.find_routes import find_routes
 from matplotlib.dates import num2date
+from driver_pete_python_sandbox.utilities import ms_to_mph
 
 
 def plot_velocity_histogram(data):
@@ -67,7 +68,6 @@ def process_gps_data(filename):
     print(AtoB_paths_indices)
     print(BtoA_paths_indices)
     
-    
     AtoB_paths = [Path(d) for d in AtoB_paths_data]
     BtoA_paths = [Path(d) for d in BtoA_paths_data]
     
@@ -84,8 +84,6 @@ def process_gps_data(filename):
         print(p.get_duration()/60, str(p.start_time()))
         p.show(str(p.get_duration()/60))
 
-    
-    
 
 if __name__ == '__main__':
     artifacts = os.path.join(os.path.dirname(__file__), 'artifacts')

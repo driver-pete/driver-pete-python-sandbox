@@ -1,9 +1,8 @@
 
-from driver_pete_python_sandbox.filter_gps import are_points_close,\
-    delta_float_time
+from driver_pete_python_sandbox.filter_gps import delta_float_time
 from driver_pete_python_sandbox.gmaps import trajectory_point_to_str
-from geopy.distance import vincenty
 import numpy as np
+from driver_pete_python_sandbox.utilities import distance
 
 
 class RoutesFinder(object):
@@ -17,9 +16,6 @@ class RoutesFinder(object):
         self._current_route = []
         self._from_endpoint_index = None
         self._verbose = verbose
-
-    def _distance_to_endpoint(self, point, endpoint_index):
-        return vincenty(point[1:], self._endpoints[endpoint_index][1:]).meters
 
     def _start_route(self, point, endpoint_index):
         self._from_endpoint_index = endpoint_index
@@ -38,7 +34,7 @@ class RoutesFinder(object):
 
     def _get_closest_endpoint_index(self, point):
         for i in range(len(self._endpoints)):
-            if self._distance_to_endpoint(point, i) < self._distance_to_start_route:
+            if distance(point, self._endpoints[i]) < self._distance_to_start_route:
                 return i
         return None
 

@@ -37,6 +37,7 @@ def process_gps_data(filename):
         print(trajectory_point_to_str([u], 0))
 
     AtoB_paths, BtoA_paths = find_routes(data, endpoints, verbose=False)
+
     def _extract_indices(data, paths):
         indices = []
         for p in paths:

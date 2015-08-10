@@ -84,13 +84,11 @@ class VelocityOutliersFilter(object):
         dt = delta_float_time(current_p[0], next_p[0])
         v = ms_to_mph*dist/dt
         if v > self._speed_threshold:
-            #print('large speed')
             if self._outliers_counter > 0:
                 self._outliers_counter -= 1
                 return False
   
         if dist > self._distance_threshold:
-            #print('large distance')
             if self._outliers_counter > 0:
                 self._outliers_counter -= 1
                 return False

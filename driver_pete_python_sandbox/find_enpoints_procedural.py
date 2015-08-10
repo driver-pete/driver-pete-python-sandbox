@@ -10,7 +10,6 @@ def find_endpoints_batch(data):
     # get indices on the trajectory where we spend a lot of time still
     stationary_threshold = (60*60) * 3  # hours
     stationary_points = np.where(delta_time>stationary_threshold)[0]
-    #stationary_points = [0] + list(stationary_points) + [data.shape[0]-1]
     
     # filter out stationary points that are driving-distance (1km) close to each other
     is_index_close = lambda index1, index2: are_points_close(data, index1, index2, 1000)

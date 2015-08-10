@@ -88,12 +88,9 @@ def trajectory_point_to_str(data, index):
         (index, date, request, address, duration)
 
 
-def show_path(path):
+def show_path(path, name='path'):
     times, coordinates = path[:, 0], path[:, 1:]
     imgdata = get_static_google_map(path=coordinates, zoom=None)
  
-    cv2.imshow("path", imgdata)
+    cv2.imshow(name, imgdata)
     cv2.waitKey()
-     
-    plots.plot(coordinates[:, 0], coordinates[:, 1], 'ro')
-    plots.show()

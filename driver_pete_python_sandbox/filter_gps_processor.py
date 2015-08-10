@@ -19,7 +19,6 @@ class DuplicateTimeFilter(object):
     def allow(self, current_p, next_p):
         dt = delta_float_time(current_p[0], next_p[0])
         if dt < 1:
-            print('duplicate time')
             return False
         return True
 
@@ -36,7 +35,6 @@ class StationaryPointsFilter(object):
     def allow(self, current_p, next_p):
         dist = vincenty(current_p[1:], next_p[1:]).meters
         if dist < self._stationary_distance_threshold:
-            print('duplicate position')
             return False
         return True
 
@@ -86,13 +84,13 @@ class VelocityOutliersFilter(object):
         dt = delta_float_time(current_p[0], next_p[0])
         v = ms_to_mph*dist/dt
         if v > self._speed_threshold:
-            print('large speed')
+            #print('large speed')
             if self._outliers_counter > 0:
                 self._outliers_counter -= 1
                 return False
   
         if dist > self._distance_threshold:
-            print('large distance')
+            #print('large distance')
             if self._outliers_counter > 0:
                 self._outliers_counter -= 1
                 return False

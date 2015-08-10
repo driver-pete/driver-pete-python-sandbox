@@ -61,7 +61,7 @@ def process_gps_data(filename):
     20.8166666667
     334.8
     '''
-    show_path(data, AtoB_paths[6])
+    show_path(data, AtoB_paths[0])
     # show_path(data, BtoA_paths[0])
     path_indices = AtoB_paths[1]
     path = data[path_indices[0]:path_indices[1]+1, :]

@@ -80,8 +80,7 @@ def trajectory_point_to_str(data, index):
         (index, date, request, address, duration)
 
 
-def show_path(data, path_indices):
-    path = data[path_indices[0]:path_indices[1]+1, :]
+def show_path(path):
     times, coordinates = path[:, 0], path[:, 1:]
     
     center = np.average(coordinates, axis=0)

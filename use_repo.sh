@@ -36,7 +36,7 @@ fi
 source $VENV/bin/activate
 
 # install robustus into virtualenv
-pip install -U git+http://github.com/braincorp/robustus.git@dont_compile_pyside_on_travis
+pip install -U git+http://github.com/braincorp/robustus.git
 
 # create folder for packages compilation cache
 mkdir -p ~/.robustus_rc/wheelhouse

@@ -54,11 +54,11 @@ class S3(object):
 
 
 if __name__ == '__main__':
-    artifacts = os.path.join(os.path.dirname(__file__), 'artifacts/raw')
+    artifacts = os.path.join(os.path.dirname(__file__), 'artifacts/_testing')
     if not os.path.exists(artifacts):
         os.mkdir(artifacts)
 
     s3 = S3('driverpete-storage')
-    for k in s3.list_keys("Oleg"):
+    for k in s3.list_keys("_testing"):
         print(k)
-    s3.download_folder('Oleg', artifacts)
+    s3.download_folder('_testing', artifacts)

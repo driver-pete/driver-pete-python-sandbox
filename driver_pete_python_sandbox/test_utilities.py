@@ -10,13 +10,13 @@ from driver_pete_python_sandbox.utilities import delta_float_time, distance
 
 def test_delta_time():
     datestr_array = [
-        '04-08-2015_14-35-50',
-        '04-08-2015_14-52-31',
-        '04-08-2015_14-52-37',
-        '04-08-2015_14-59-30',
-        '04-08-2015_14-59-30',
-        '05-08-2015_15-46-30',
-        '05-09-2015_15-46-38',
+        '04-08-2015_14-35-50_PDT',
+        '04-08-2015_14-52-31_PDT',
+        '04-08-2015_14-52-37_PDT',
+        '04-08-2015_14-59-30_PDT',
+        '04-08-2015_14-59-30_PDT',
+        '05-08-2015_15-46-30_PDT',
+        '05-09-2015_15-46-38_PDT',
     ]
     
     dates_nums = [date_str_to_num_converter(el) for el in datestr_array]

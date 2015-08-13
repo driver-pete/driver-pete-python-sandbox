@@ -6,6 +6,7 @@
 # ============================================================================
 from driver_pete_python_sandbox.trajectory_reader import date_str_to_num_converter
 from driver_pete_python_sandbox.utilities import delta_float_time, distance
+import numpy as np
 
 
 def test_delta_time():
@@ -43,7 +44,7 @@ def test_delta_dist():
         ds.append(distance(data_points[i], data_points[i+1]))
 
     expected_ds = [151.20243391843636, 97.87941457631524, 0.0, 56.95460850285275]
-    assert(expected_ds == ds)
+    np.testing.assert_array_almost_equal(expected_ds, ds)
 
 
 if __name__ == '__main__':

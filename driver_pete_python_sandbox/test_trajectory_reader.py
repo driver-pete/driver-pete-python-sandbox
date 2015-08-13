@@ -11,6 +11,7 @@ def test_trajectory_reader():
     s3 = S3('driverpete-storage')
     filename = s3.download("_testing/testing_merged_0", folder)
     trajectory = read_compressed_trajectory(filename)
+    assert(len(trajectory) == 2423)
     write_compressed_trajectory(trajectory, os.path.join(folder, 'trajectory_copy'))
     trajectory_copy = read_compressed_trajectory(os.path.join(folder, 'trajectory_copy'))
     assert((trajectory == trajectory_copy).all())

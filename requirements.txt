@@ -6,6 +6,7 @@ opencv==2.4.8
 geopy==1.6.1
 boto==2.38.0
 pytz==2015.4
+polyline==1.1
 
 # Test functionality
 pep8==1.4.6

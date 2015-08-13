@@ -12,10 +12,12 @@ import numpy as np
 from geopy.geocoders import GoogleV3 as Geocoder
 from matplotlib.dates import datestr2num, num2date
 import matplotlib.pyplot as plots
+from polyline.codec import PolylineCodec
 
 
 def get_static_google_map(center=None, zoom=12, imgsize=(500, 500), imgformat="jpg",
-                          maptype="roadmap", markers=None):  
+                          maptype="roadmap", markers=None,
+                          path=None):  
     """retrieve a map (image) from the static google maps server 
     
      See: http://code.google.com/apis/maps/documentation/staticmaps/
@@ -53,6 +55,12 @@ def get_static_google_map(center=None, zoom=12, imgsize=(500, 500), imgformat="j
         marker_str += "&"
         request += marker_str
 
+    if path is not None:
+        path_str="path=color:0xff0000|weight:4|"
+        encoded_path = PolylineCodec().encode(path)
+        path_str+= 'enc:%s&' % encoded_path
+        request += path_str
+
     # request += "mobile=false&"  # optional: mobile=true will assume the image is shown on a small screen (mobile device)
     request += "sensor=false&"   # must be given, deals with getting location from mobile device 
     
@@ -80,21 +88,9 @@ def trajectory_point_to_str(data, index):
         (index, date, request, address, duration)
 
 
-def show_path(path):
+def show_path(path, name='path'):
     times, coordinates = path[:, 0], path[:, 1:]
-    
-    center = np.average(coordinates, axis=0)
+    imgdata = get_static_google_map(path=coordinates, zoom=None)
  
-    max_markers = 64
-    for i in range(len(coordinates)/max_markers + 1):
-        imgdata = get_static_google_map(
-            markers=coordinates[i*max_markers:(i+1)*max_markers]
-            # center=center,
-            # zoom=11,
-        )
-     
-        cv2.imshow(str(i), imgdata)
+    cv2.imshow(name, imgdata)
     cv2.waitKey()
-     
-    plots.plot(coordinates[:, 0], coordinates[:, 1], 'ro')
-    plots.show()

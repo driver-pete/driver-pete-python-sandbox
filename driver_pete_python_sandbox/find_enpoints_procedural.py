@@ -1,6 +1,6 @@
-from driver_pete_python_sandbox.filter_gps import extract_delta_time,\
-    are_points_close
+from driver_pete_python_sandbox.filter_gps import extract_delta_time
 import numpy as np
+from driver_pete_python_sandbox.utilities import distance
 
 
 def find_endpoints_batch(data):
@@ -12,7 +12,7 @@ def find_endpoints_batch(data):
     stationary_points = np.where(delta_time>stationary_threshold)[0]
     
     # filter out stationary points that are driving-distance (1km) close to each other
-    is_index_close = lambda index1, index2: are_points_close(data, index1, index2, 1000)
+    is_index_close = lambda index1, index2: distance(data[index1], data[index2]) < 1000
 
     unique_locations = [stationary_points[0]]
     for s in stationary_points:

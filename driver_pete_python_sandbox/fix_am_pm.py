@@ -3,7 +3,6 @@ import os
 from matplotlib.dates import date2num, num2date
 import dateutil
 import datetime
-from pytz import timezone
 from driver_pete_python_sandbox.trajectory_reader import read_compressed_trajectory,\
     write_compressed_trajectory, date_str_to_num_converter,\
     num_to_date_str_converter

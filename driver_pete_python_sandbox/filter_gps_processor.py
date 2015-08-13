@@ -6,10 +6,9 @@
 # ============================================================================
 
 
-from geopy.distance import vincenty
-from driver_pete_python_sandbox.filter_gps import delta_float_time, ms_to_mph
+from driver_pete_python_sandbox.filter_gps import delta_float_time
 import numpy as np
-from driver_pete_python_sandbox.gmaps import trajectory_point_to_str
+from driver_pete_python_sandbox.utilities import distance, ms_to_mph
 
 
 class DuplicateTimeFilter(object):
@@ -33,8 +32,7 @@ class StationaryPointsFilter(object):
         self._stationary_distance_threshold = distance_threshold
     
     def allow(self, current_p, next_p):
-        dist = vincenty(current_p[1:], next_p[1:]).meters
-        if dist < self._stationary_distance_threshold:
+        if distance(current_p, next_p) < self._stationary_distance_threshold:
             return False
         return True
 
@@ -80,7 +78,7 @@ class VelocityOutliersFilter(object):
         self._outliers_counter = self._max_number_outliers
     
     def allow(self, current_p, next_p):
-        dist = vincenty(current_p[1:], next_p[1:]).meters
+        dist = distance(current_p, next_p)
         dt = delta_float_time(current_p[0], next_p[0])
         v = ms_to_mph*dist/dt
         if v > self._speed_threshold:

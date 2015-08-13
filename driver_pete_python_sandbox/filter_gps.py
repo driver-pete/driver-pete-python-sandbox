@@ -7,20 +7,8 @@
 
 
 import numpy as np
-from matplotlib.dates import datestr2num, num2date
-from geopy.distance import vincenty
 import os
-
-
-ms_to_mph = 2.23694
-ms_to_kmh = 3.6
-
-
-def delta_float_time(time_float1, time_float2):
-    '''
-    Returns delta time in seconds
-    '''
-    return (num2date(time_float2) - num2date(time_float1)).total_seconds()
+from driver_pete_python_sandbox.utilities import delta_float_time, distance
 
 
 def extract_delta_time(data):
@@ -33,9 +21,8 @@ def extract_delta_time(data):
     
 
 def extract_delta_dist(data):
-    times, coordinates = data[:, 0], data[:, 1:]
-    return np.array([vincenty(coordinates[i+1], coordinates[i]).meters
-                    for i in range(coordinates.shape[0]-1)])
+    return np.array([distance(data[i+1], data[i])
+                     for i in range(data.shape[0]-1)])
     
 
 def compute_velocities(data):
@@ -65,8 +52,3 @@ def remove_stationary_points(data, distance_threshold=1.):
     result = np.delete(data, np.where(delta_dist < distance_threshold)[0] + 1, axis=0)
     print("Removed %d stationary points." % (len(data) - len(result)))
     return result
-
-
-def are_points_close(data, index1, index2, distance):
-    # predicate to determine if two points are close based on index in the trajectory
-    return vincenty(data[index1][1:], data[index2][1:]).meters < distance

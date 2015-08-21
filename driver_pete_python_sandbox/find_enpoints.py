@@ -4,10 +4,10 @@ from driver_pete_python_sandbox.utilities import distance
 
 
 class FindEndpoints(object):
-    def __init__(self, stationary_threshold = (60*60)*3, endpoints_distance = 1000.):
+    def __init__(self, stationary_threshold = (60*60)*3, endpoints_distance = 1000., endpoints=[]):
         self._stationary_threshold = stationary_threshold
         self._endpoints_distance = endpoints_distance
-        self._endpoints = []
+        self._endpoints = endpoints
         self._prev_point = None
     
     def process(self, point):
@@ -17,18 +17,24 @@ class FindEndpoints(object):
         
         dt = delta_float_time(self._prev_point[0], point[0])
         if dt > self._stationary_threshold:
-            if not self._is_endpoint_exists(self._prev_point):
+            if not self._endpoint_exists(self._prev_point):
                 self._endpoints.append(self._prev_point)
         self._prev_point = point
 
     def get_endpoints(self):
         return self._endpoints
 
-    def _is_endpoint_exists(self, endpoint):
+    def _endpoint_exists(self, endpoint):
         for e in self._endpoints:
-            if distance(self._prev_point, e) < self._endpoints_distance:
+            if distance(endpoint, e) < self._endpoints_distance:
                 return True
         return False
+
+    def set_prev_point(self, prev_point):
+        self._prev_point = prev_point
+        
+    def get_prev_point(self):
+        return self._prev_point
             
 
 def find_endpoints(data):

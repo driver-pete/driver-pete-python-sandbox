@@ -80,6 +80,13 @@ class RoutesFinder(object):
     def get_routes(self):
         return self._AtoB_routes, self._BtoA_routes
 
+    def set_state(self, current_route, from_endpoint_index):
+        self._current_route = current_route
+        self._from_endpoint_index = from_endpoint_index
+
+    def get_state(self):
+        return self._current_route, self._from_endpoint_index
+
 
 def find_routes(data, endpoints, verbose=False):
     finder = RoutesFinder(endpoints, verbose=verbose)

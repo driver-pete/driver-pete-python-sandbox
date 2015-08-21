@@ -50,6 +50,7 @@ def test_remove_duplicate_readings():
     print(fixed_data.shape[0])
     print(number_of_duplicates)
     assert(fixed_data.shape[0] == data.shape[0] - number_of_duplicates)
+    print(fixed_data.shape[0], data.shape[0])
     
     fixed_data_processor = apply_filter(data, DuplicateTimeFilter())
     assert((fixed_data == fixed_data_processor).all())
@@ -85,6 +86,7 @@ def test_remove_stationary_noise():
     data = remove_duplicate_points(_get_test_data())[561:576]
 
     fixed_data = apply_filter(data, VelocityOutliersFilter(85))
+    assert(len(fixed_data) == 11)
     
     stationary_point = [0, 33.004964, -117.060207]
     distances = np.array([distance(stationary_point, d)
@@ -108,6 +110,7 @@ def test_remove_stationary_noise_return_to_stable():
     distances = np.array([distance(stationary_point, d)
                           for d in fixed_data])
 
+    assert(len(fixed_data) == 7)
     # filter converged after 4 steps
     assert((distances[:4] > 157000).all())
     assert((distances[4:] < 246.6).all())
@@ -115,8 +118,11 @@ def test_remove_stationary_noise_return_to_stable():
  
 def test_filter_gps():
     original_data = _get_test_data()
+    assert(len(original_data) == 793)
     data = filter_gps_data(original_data)
-    assert(len(original_data)-len(data) == 11)
+    print(len(data))
+    assert(len(data) == 791)
+    #assert(len(original_data)-len(data) == 11)
      
     
 if __name__ == '__main__':

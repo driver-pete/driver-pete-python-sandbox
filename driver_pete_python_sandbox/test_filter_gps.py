@@ -120,9 +120,8 @@ def test_filter_gps():
     original_data = _get_test_data()
     assert(len(original_data) == 793)
     data = filter_gps_data(original_data)
-    print(len(data))
-    assert(len(data) == 791)
-    #assert(len(original_data)-len(data) == 11)
+    assert(len(data) == 782)
+    assert(len(original_data)-len(data) == 11)
      
     
 if __name__ == '__main__':

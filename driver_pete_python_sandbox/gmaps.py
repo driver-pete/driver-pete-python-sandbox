@@ -8,6 +8,7 @@
 
 import cv2
 import urllib
+import pytz
 import numpy as np
 from geopy.geocoders import GoogleV3 as Geocoder
 from matplotlib.dates import datestr2num, num2date
@@ -75,17 +76,21 @@ def get_static_google_map(center=None, zoom=12, imgsize=(500, 500), imgformat="j
     return picture
 
 
-def trajectory_point_to_str(data, index):
-    geocoder = Geocoder()
-    request = "%s, %s" % tuple(data[index][1:])
-    address = geocoder.reverse(request, exactly_one = True).address
-    date = num2date(data[index][0])
+def trajectory_point_to_str(data, index, with_address=True):
+    coords = "%s, %s" % tuple(data[index][1:])
+    if with_address:
+        geocoder = Geocoder()
+        address = geocoder.reverse(coords, exactly_one = True).address
+    else:
+        address = None
+    tz = pytz.timezone('US/Pacific')
+    date = num2date(data[index][0], tz=tz)
     try:
         duration = num2date(data[index+1][0]) - date
     except IndexError:
         duration = "NO DATA"
     return "Index:%s; Date:%s; Address:%s; Coords: %s; Duration:%s;" % \
-        (index, date, request, address, duration)
+        (index, date, address, coords, duration)
 
 
 def show_path(path, name='path'):

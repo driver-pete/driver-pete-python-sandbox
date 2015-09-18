@@ -9,6 +9,7 @@
 from driver_pete_python_sandbox.filter_gps import delta_float_time
 import numpy as np
 from driver_pete_python_sandbox.utilities import distance, ms_to_mph
+from driver_pete_python_sandbox.gmaps import trajectory_point_to_str
 
 
 class DuplicateTimeFilter(object):
@@ -18,21 +19,6 @@ class DuplicateTimeFilter(object):
     def allow(self, current_p, next_p):
         dt = delta_float_time(current_p[0], next_p[0])
         if dt < 1:
-            return False
-        return True
-
-
-class StationaryPointsFilter(object):
-    '''
-    If coordinates are not changing, there is no need to keep the record because
-    timestamp can always show how long did we spend at that place
-    distance_threshold - which points consider to be close
-    '''
-    def __init__(self, distance_threshold=1.):
-        self._stationary_distance_threshold = distance_threshold
-    
-    def allow(self, current_p, next_p):
-        if distance(current_p, next_p) < self._stationary_distance_threshold:
             return False
         return True
 
@@ -70,14 +56,19 @@ class VelocityOutliersFilter(object):
     that if algorithm starts from the LA, it will never converge back to SD. Therefore there is a counter that doesn't
     allow algorithm to dismiss too many outliers in a row (there are not outliers in this case).
     '''
-    def __init__(self, speed_mph_thershold=85., distance_threshold=5000.):
+    def __init__(self, speed_mph_thershold=85., distance_threshold=5000., stationary_distance_threshold=1.):
         self._speed_threshold = speed_mph_thershold
         self._distance_threshold = distance_threshold
+        self._stationary_distance_threshold = stationary_distance_threshold
         
         self._max_number_outliers = 3
         self._outliers_counter = self._max_number_outliers
+        self._last_next_p = None
     
-    def allow(self, current_p, next_p):
+    def allow(self, current_p, next_p):  
+        if self._last_next_p is not None:
+            current_p = self._last_next_p
+          
         dist = distance(current_p, next_p)
         dt = delta_float_time(current_p[0], next_p[0])
         v = ms_to_mph*dist/dt
@@ -91,13 +82,18 @@ class VelocityOutliersFilter(object):
                 self._outliers_counter -= 1
                 return False
         self._outliers_counter = self._max_number_outliers
+        
+        if distance(current_p, next_p) < self._stationary_distance_threshold:
+            self._last_next_p = next_p
+            return False
+        self._last_next_p = None
         return True
 
     def get_state(self):
-        return self._outliers_counter
+        return self._outliers_counter, self._last_next_p
 
     def set_state(self, state):
-        self._outliers_counter = state
+        self._outliers_counter, self._last_next_p = state
 
 
 class FilterChain(object):
@@ -115,15 +111,22 @@ def apply_filter(data, afilter):
     prev_point = data[0]
     result = [prev_point]
     for i in range(1, data.shape[0]):
+#         print("------------------")
+#         print(trajectory_point_to_str([prev_point], 0))
+#         print(trajectory_point_to_str([data[i]], 0))
         if afilter.allow(prev_point, data[i]):
             prev_point = data[i]
             result.append(data[i])
+        else:
+            print(i)
 
     return np.array(result)
 
 
 def filter_gps_data(data, speed_mph_thershold=85, stationary_distance_threshold=1.):
     filter = FilterChain([DuplicateTimeFilter(),
-                          StationaryPointsFilter(stationary_distance_threshold),
-                          VelocityOutliersFilter(speed_mph_thershold)])
+                          VelocityOutliersFilter(speed_mph_thershold=speed_mph_thershold,
+                                                 stationary_distance_threshold=stationary_distance_threshold)
+                          
+                          ])
     return apply_filter(data, filter)

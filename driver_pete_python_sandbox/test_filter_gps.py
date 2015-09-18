@@ -75,7 +75,7 @@ def test_remove_outliers():
     assert(np.amax(extract_delta_dist(fixed_data)) < 330)
     
     # we expect 5 point to be removed
-    assert(data.shape[0] - fixed_data.shape[0] == 5)
+    assert(data.shape[0] - fixed_data.shape[0] == 6)
 
 
 def test_remove_stationary_noise():
@@ -86,7 +86,7 @@ def test_remove_stationary_noise():
     data = remove_duplicate_points(_get_test_data())[561:576]
 
     fixed_data = apply_filter(data, VelocityOutliersFilter(85))
-    assert(len(fixed_data) == 11)
+    assert(len(fixed_data) == 10)
     
     stationary_point = [0, 33.004964, -117.060207]
     distances = np.array([distance(stationary_point, d)
@@ -110,18 +110,49 @@ def test_remove_stationary_noise_return_to_stable():
     distances = np.array([distance(stationary_point, d)
                           for d in fixed_data])
 
-    assert(len(fixed_data) == 7)
-    # filter converged after 4 steps
-    assert((distances[:4] > 157000).all())
-    assert((distances[4:] < 246.6).all())
+    assert(len(fixed_data) == 4)
+    # filter converged after 1 step
+    assert((distances[:1] > 157000).all())
+    assert((distances[1:] < 246.6).all())
     
  
 def test_filter_gps():
     original_data = _get_test_data()
     assert(len(original_data) == 793)
     data = filter_gps_data(original_data)
-    assert(len(data) == 782)
-    assert(len(original_data)-len(data) == 11)
+    assert(len(data) == 776)
+    assert(len(original_data)-len(data) == 17)
+
+
+def test_velocity_filter_decay():
+    '''
+    Sometimes points between outliers are removed by other filters, so VelocityOutliersFilter
+    starts to compare outliers with earlier and earlier points that makes velocity to go
+    down so they are not considered as outliers anymore
+    '''
+    timestamps = np.array([
+        735856.225625, 735856.22609954, 735856.2265625,
+        735856.22701389, 735856.25675926, 735856.2572338 ,
+        735856.25731481, 735856.41100694])
+    coords = np.array([
+        [3.30049220e+01, -1.17060744e+02],
+        [3.29771600e+01, -1.17078251e+02],
+        [3.29771580e+01, -1.17078254e+02],
+        [3.30049220e+01, -1.17060744e+02],
+        [3.30049220e+01, -1.17060744e+02],
+        [3.29771590e+01, -1.17078258e+02],
+        [3.30049230e+01, -1.17060575e+02],
+        [3.30049410e+01, -1.17060618e+02]])
+    data = np.hstack([timestamps[:, None], coords])
+    
+    filtered_coords = filter_gps_data(data)[:, 1:]
+    
+    np.testing.assert_array_almost_equal(
+        filtered_coords,
+        [[3.30049220e+01, -1.17060744e+02],
+         [3.30049230e+01, -1.17060575e+02],
+         [3.30049410e+01, -1.17060618e+02]]
+    )
      
     
 if __name__ == '__main__':
@@ -130,3 +161,4 @@ if __name__ == '__main__':
     test_remove_stationary_noise()
     test_remove_stationary_noise_return_to_stable()
     test_filter_gps()
+    test_velocity_filter_decay()

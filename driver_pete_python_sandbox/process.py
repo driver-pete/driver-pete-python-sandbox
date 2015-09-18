@@ -42,25 +42,38 @@ class Path(object):
 
 
 def process_gps_data(filename):
+    #stationary_distance_threshold=120
     # clean up data
-    data = filter_gps_data(read_compressed_trajectory(filename))
-    print("Length of data: %d" % len(data)) 
+    data = read_compressed_trajectory(filename)
+    print("Length of data: %d" % len(data))
+    
+    data = filter_gps_data(data, stationary_distance_threshold=100)
+    print("Length of filtered data: %d" % len(data))
+    
+    for i in range(0, 100):
+        print(trajectory_point_to_str(data, i, with_address=False))
+
+    #data = data[525:533]
+
+
 
     endpoints = find_endpoints(data)
-    assert(len(endpoints) == 2)
     print("Found %d endpoints:" % len(endpoints))
     for u in endpoints:
         print(trajectory_point_to_str([u], 0))
-
+    
+    assert(len(endpoints) == 2)
+    #data = data[:130]
+    #Path(data).show()
     AtoB_paths_data, BtoA_paths_data = find_routes(data, endpoints, verbose=False)
-
+    
     def _extract_indices(data, paths):
-        indices = []
+        result = []
         for p in paths:
             indices = [(data[:, 0] == p[0, 0]).nonzero()[0][0],
                        (data[:, 0] == p[p.shape[0]-1, 0]).nonzero()[0][0]]
-            indices.append(indices)
-        return indices
+            result.append(indices)
+        return result
 
     AtoB_paths_indices = _extract_indices(data, AtoB_paths_data)
     BtoA_paths_indices = _extract_indices(data, BtoA_paths_data)

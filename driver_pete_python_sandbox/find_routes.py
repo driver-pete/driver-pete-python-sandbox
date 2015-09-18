@@ -6,7 +6,7 @@ from driver_pete_python_sandbox.utilities import distance
 
 
 class RoutesFinder(object):
-    def __init__(self, endpoints, distance_to_start_route=200, continuity_threshold=60*10, verbose=False):
+    def __init__(self, endpoints, distance_to_start_route=400, continuity_threshold=60*10, verbose=False):
         self._endpoints = endpoints
         assert(len(self._endpoints) == 2)
         self._distance_to_start_route = distance_to_start_route
@@ -18,6 +18,7 @@ class RoutesFinder(object):
         self._verbose = verbose
 
     def _start_route(self, point, endpoint_index):
+        assert(endpoint_index is not None)
         self._from_endpoint_index = endpoint_index
         self._current_route.append(point)
         if self._verbose:
@@ -34,12 +35,15 @@ class RoutesFinder(object):
 
     def _get_closest_endpoint_index(self, point):
         for i in range(len(self._endpoints)):
-            if distance(point, self._endpoints[i]) < self._distance_to_start_route:
+            d = distance(point, self._endpoints[i])
+            #print("Distance from point %i: %dm" % (i, d))
+            if d < self._distance_to_start_route:
                 return i
         return None
 
     def process(self, point):
         if self._from_endpoint_index is None:
+            #print("Looking to start route from...")
             index = self._get_closest_endpoint_index(point)
             if index is not None:
                 self._start_route(point, index)
@@ -48,8 +52,19 @@ class RoutesFinder(object):
             dt = delta_float_time(self._current_route[-1][0], point[0])
             if dt > self._continuity_threshold:
                 if self._verbose:
-                    print('Continuity ruined at %s' % trajectory_point_to_str([point], 0))
-                self._stop_route()
+                    dist = distance(point, self._endpoints[self._from_endpoint_index])
+                    print('Continuity ruined from %s\n    to %s\n   dt=%smin, dist=%s' %
+                          (trajectory_point_to_str([self._current_route[-1]], 0),
+                           trajectory_point_to_str([point], 0),
+                           dt/60., dist))
+                index = self._get_closest_endpoint_index(point)
+                if index == self._from_endpoint_index:
+                    if self._verbose:
+                        print(' !BUT Didnt move too far from beginning though')
+                    self._stop_route()
+                    self._start_route(point, index)
+                else:
+                    self._stop_route()
                 return
             
             self._current_route.append(point)
@@ -90,7 +105,9 @@ class RoutesFinder(object):
 
 def find_routes(data, endpoints, verbose=False):
     finder = RoutesFinder(endpoints, verbose=verbose)
-    for d in data:
+    for i, d in enumerate(data):
+        if verbose:
+            print("   - %s" % trajectory_point_to_str(data, i))
         finder.process(d)
          
     return finder.get_routes()

@@ -56,7 +56,7 @@ class VelocityOutliersFilter(object):
     that if algorithm starts from the LA, it will never converge back to SD. Therefore there is a counter that doesn't
     allow algorithm to dismiss too many outliers in a row (there are not outliers in this case).
     '''
-    def __init__(self, speed_mph_thershold=85., distance_threshold=5000., stationary_distance_threshold=1.):
+    def __init__(self, speed_mph_thershold=85., distance_threshold=5000.):
         self._speed_threshold = speed_mph_thershold
         self._distance_threshold = distance_threshold
         
@@ -102,9 +102,6 @@ def apply_filter(data, afilter):
     prev_point = data[0]
     result = [prev_point]
     for i in range(1, data.shape[0]):
-#         print("------------------")
-#         print(trajectory_point_to_str([prev_point], 0))
-#         print(trajectory_point_to_str([data[i]], 0))
         if afilter.allow(prev_point, data[i]):
             prev_point = data[i]
             result.append(data[i])

@@ -35,15 +35,12 @@ class RoutesFinder(object):
 
     def _get_closest_endpoint_index(self, point):
         for i in range(len(self._endpoints)):
-            d = distance(point, self._endpoints[i])
-            #print("Distance from point %i: %dm" % (i, d))
-            if d < self._distance_to_start_route:
+            if distance(point, self._endpoints[i]) < self._distance_to_start_route:
                 return i
         return None
 
     def process(self, point):
         if self._from_endpoint_index is None:
-            #print("Looking to start route from...")
             index = self._get_closest_endpoint_index(point)
             if index is not None:
                 self._start_route(point, index)

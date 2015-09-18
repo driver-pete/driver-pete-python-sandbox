@@ -47,7 +47,7 @@ def process_gps_data(filename):
     data = read_compressed_trajectory(filename)
     print("Length of data: %d" % len(data))
     
-    data = filter_gps_data(data, stationary_distance_threshold=100)
+    data = filter_gps_data(data)
     print("Length of filtered data: %d" % len(data))
     
     endpoints = find_endpoints(data)

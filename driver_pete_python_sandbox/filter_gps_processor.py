@@ -109,10 +109,7 @@ def apply_filter(data, afilter):
     return np.array(result)
 
 
-def filter_gps_data(data, speed_mph_thershold=85, stationary_distance_threshold=1.):
+def filter_gps_data(data, speed_mph_thershold=85):
     filter = FilterChain([DuplicateTimeFilter(),
-                          VelocityOutliersFilter(speed_mph_thershold=speed_mph_thershold,
-                                                 stationary_distance_threshold=stationary_distance_threshold)
-                          
-                          ])
+                          VelocityOutliersFilter(speed_mph_thershold=speed_mph_thershold)])
     return apply_filter(data, filter)

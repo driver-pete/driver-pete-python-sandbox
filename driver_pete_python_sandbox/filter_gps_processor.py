@@ -59,16 +59,11 @@ class VelocityOutliersFilter(object):
     def __init__(self, speed_mph_thershold=85., distance_threshold=5000., stationary_distance_threshold=1.):
         self._speed_threshold = speed_mph_thershold
         self._distance_threshold = distance_threshold
-        self._stationary_distance_threshold = stationary_distance_threshold
         
         self._max_number_outliers = 3
         self._outliers_counter = self._max_number_outliers
-        self._last_next_p = None
     
-    def allow(self, current_p, next_p):  
-        if self._last_next_p is not None:
-            current_p = self._last_next_p
-          
+    def allow(self, current_p, next_p):    
         dist = distance(current_p, next_p)
         dt = delta_float_time(current_p[0], next_p[0])
         v = ms_to_mph*dist/dt
@@ -83,17 +78,13 @@ class VelocityOutliersFilter(object):
                 return False
         self._outliers_counter = self._max_number_outliers
         
-        if distance(current_p, next_p) < self._stationary_distance_threshold:
-            self._last_next_p = next_p
-            return False
-        self._last_next_p = None
         return True
 
     def get_state(self):
-        return self._outliers_counter, self._last_next_p
+        return self._outliers_counter
 
     def set_state(self, state):
-        self._outliers_counter, self._last_next_p = state
+        self._outliers_counter = state
 
 
 class FilterChain(object):

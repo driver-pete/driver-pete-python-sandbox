@@ -35,8 +35,10 @@ def test_finding_paths():
     
     endpoints = find_endpoints(data)
     assert(len(endpoints) == 2)
-    assert(_get_point_index(data, endpoints[0]) == 478)
-    assert(_get_point_index(data, endpoints[1]) == 669)
+    print(trajectory_point_to_str(data, _get_point_index(data, endpoints[0])))
+    print(trajectory_point_to_str(data, _get_point_index(data, endpoints[1])))
+    assert(_get_point_index(data, endpoints[0]) == 479)
+    assert(_get_point_index(data, endpoints[1]) == 670)
 
     AtoB_paths, BtoA_paths = find_routes(data, endpoints, verbose=False)
 
@@ -44,8 +46,8 @@ def test_finding_paths():
     BtoA_paths_indices = _extract_indices(data, BtoA_paths)
     print(AtoB_paths_indices)
     print(BtoA_paths_indices)
-    assert(AtoB_paths_indices == [[487, 655], [946, 1116], [1363, 1548], [2214, 2399], [2628, 2896], [4381, 4507]])
-    assert(BtoA_paths_indices == [[133, 454], [682, 886], [1140, 1315], [1581, 1782], [2427, 2595], [3962, 4157]])
+    assert(AtoB_paths_indices == [[488, 656], [947, 1117], [1364, 1549], [2216, 2401], [2630, 2898], [4400, 4526]])
+    assert(BtoA_paths_indices == [[134, 455], [683, 887], [1141, 1316], [1582, 1783], [2429, 2597], [3975, 4170]])
 
 
 def test_finding_paths_with_state():
@@ -87,8 +89,8 @@ def test_finding_paths_with_state():
         findendpoints_state = finder.get_state()
 
     data = np.vstack(filtered_pieces)
-    assert(_get_point_index(data, endpoints[0]) == 478)
-    assert(_get_point_index(data, endpoints[1]) == 669)
+    assert(_get_point_index(data, endpoints[0]) == 479)
+    assert(_get_point_index(data, endpoints[1]) == 670)
 
     AtoB_paths = []
     BtoA_paths = []
@@ -114,8 +116,8 @@ def test_finding_paths_with_state():
     print(AtoB_paths_indices)
     print(BtoA_paths_indices)
     
-    assert(AtoB_paths_indices == [[487, 655], [946, 1116], [1363, 1548], [2214, 2399], [2628, 2896], [4381, 4507]])
-    assert(BtoA_paths_indices == [[133, 454], [682, 886], [1140, 1315], [1581, 1782], [2427, 2595], [3962, 4157]])
+    assert(AtoB_paths_indices == [[488, 656], [947, 1117], [1364, 1549], [2216, 2401], [2630, 2898], [4400, 4526]])
+    assert(BtoA_paths_indices == [[134, 455], [683, 887], [1141, 1316], [1582, 1783], [2429, 2597], [3975, 4170]])
 
 
 def test_finding_paths_with_state_2():
@@ -161,10 +163,13 @@ def test_finding_paths_with_state_2():
         findendpoints_state = finder.get_state()
 
     data = np.vstack(filtered_pieces)
+    
+    print(trajectory_point_to_str(data, _get_point_index(data, endpoints[0])))
+    print(trajectory_point_to_str(data, _get_point_index(data, endpoints[1])))
 
     assert(len(endpoints) == 2)
     assert(_get_point_index(data, endpoints[0]) == 5)
-    assert(_get_point_index(data, endpoints[1]) == 121)
+    assert(_get_point_index(data, endpoints[1]) == 122)
 
     AtoB_paths = []
     BtoA_paths = []
@@ -188,8 +193,10 @@ def test_finding_paths_with_state_2():
     AtoB_paths_indices = _extract_indices(data, AtoB_paths)
     BtoA_paths_indices = _extract_indices(data, BtoA_paths)
     
-    assert(AtoB_paths_indices == [[10, 110], [519, 692]])
-    assert(BtoA_paths_indices == [[262, 361]])
+    print(AtoB_paths_indices)
+    print(BtoA_paths_indices)
+    assert(AtoB_paths_indices == [[11, 111], [556, 730]])
+    assert(BtoA_paths_indices == [[288, 387]])
 
 
 if __name__ == '__main__':

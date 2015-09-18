@@ -50,21 +50,12 @@ def process_gps_data(filename):
     data = filter_gps_data(data, stationary_distance_threshold=100)
     print("Length of filtered data: %d" % len(data))
     
-    for i in range(0, 100):
-        print(trajectory_point_to_str(data, i, with_address=False))
-
-    #data = data[525:533]
-
-
-
     endpoints = find_endpoints(data)
     print("Found %d endpoints:" % len(endpoints))
     for u in endpoints:
         print(trajectory_point_to_str([u], 0))
     
     assert(len(endpoints) == 2)
-    #data = data[:130]
-    #Path(data).show()
     AtoB_paths_data, BtoA_paths_data = find_routes(data, endpoints, verbose=False)
     
     def _extract_indices(data, paths):
@@ -87,10 +78,10 @@ def process_gps_data(filename):
     AtoB_paths = sorted(AtoB_paths, key=lambda x: x.get_duration())
     BtoA_paths = sorted(BtoA_paths, key=lambda x: x.get_duration())
 
-#     print("ATOB")
-#     for p in AtoB_paths:
-#         print(p.get_duration()/60, str(p.start_time()))
-#         p.show(str(p.get_duration()/60))
+    print("ATOB")
+    for p in AtoB_paths:
+        print(p.get_duration()/60, str(p.start_time()))
+        p.show(str(p.get_duration()/60))
 
     print("BTOA")
     for p in BtoA_paths:

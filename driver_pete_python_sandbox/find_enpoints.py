@@ -6,7 +6,7 @@ from driver_pete_python_sandbox.gmaps import trajectory_point_to_str
 
 class FindEndpoints(object):
     def __init__(self, stationary_threshold = (60*60)*5, endpoints_distance = 1000., endpoints=[],
-            stationary_distance_threshold = 500):
+                 stationary_distance_threshold = 500):
         self._stationary_threshold = stationary_threshold
         assert(stationary_distance_threshold < endpoints_distance)
         self._endpoints_distance = endpoints_distance

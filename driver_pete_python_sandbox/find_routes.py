@@ -103,8 +103,6 @@ class RoutesFinder(object):
 def find_routes(data, endpoints, verbose=False):
     finder = RoutesFinder(endpoints, verbose=verbose)
     for i, d in enumerate(data):
-        if verbose:
-            print("   - %s" % trajectory_point_to_str(data, i))
         finder.process(d)
          
     return finder.get_routes()

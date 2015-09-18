@@ -9,6 +9,21 @@ from driver_pete_python_sandbox.find_routes import find_routes, RoutesFinder
 from driver_pete_python_sandbox.find_enpoints import find_endpoints,\
     FindEndpoints
 import numpy as np
+from driver_pete_python_sandbox.gmaps import trajectory_point_to_str
+from driver_pete_python_sandbox.process import Path
+
+
+def _extract_indices(data, paths):
+    result = []
+    for p in paths:
+        indices = [(data[:, 0] == p[0, 0]).nonzero()[0][0],
+                   (data[:, 0] == p[p.shape[0]-1, 0]).nonzero()[0][0]]
+        result.append(indices)
+    return result
+
+
+def _get_point_index(data, point):
+    return (data[:, 0] == point[0]).nonzero()[0][0]
 
 
 def test_finding_paths():
@@ -17,20 +32,13 @@ def test_finding_paths():
     filename = s3.download("_testing/testing_merged_1", folder)
         
     data = filter_gps_data(read_compressed_trajectory(filename))
-
+    
     endpoints = find_endpoints(data)
-    assert((data[:, 0] == endpoints[0][0]).nonzero()[0][0] == 478)
-    assert((data[:, 0] == endpoints[1][0]).nonzero()[0][0] == 669)
+    assert(len(endpoints) == 2)
+    assert(_get_point_index(data, endpoints[0]) == 478)
+    assert(_get_point_index(data, endpoints[1]) == 669)
 
     AtoB_paths, BtoA_paths = find_routes(data, endpoints, verbose=False)
-    
-    def _extract_indices(data, paths):
-        result = []
-        for p in paths:
-            indices = [(data[:, 0] == p[0, 0]).nonzero()[0][0],
-                       (data[:, 0] == p[p.shape[0]-1, 0]).nonzero()[0][0]]
-            result.append(indices)
-        return result
 
     AtoB_paths_indices = _extract_indices(data, AtoB_paths)
     BtoA_paths_indices = _extract_indices(data, BtoA_paths)
@@ -56,7 +64,7 @@ def test_finding_paths_with_state():
     filtered_pieces = []
     endpoints = []
     
-    findendpoints_prev_point = None
+    findendpoints_state = None
     filter_state = None
     for piece in pieces:
         vel_filter = VelocityOutliersFilter()
@@ -65,23 +73,22 @@ def test_finding_paths_with_state():
         filter = FilterChain([DuplicateTimeFilter(),
                               vel_filter])
         filtered_piece = apply_filter(piece, filter)
-        print(piece.shape, filtered_piece.shape)
         
-        #filter_state = vel_filter.get_state()
+        filter_state = vel_filter.get_state()
         
         filtered_pieces.append(filtered_piece)
         
         finder = FindEndpoints(endpoints=endpoints)
-        finder.set_prev_point(findendpoints_prev_point)
-        i = 0
+        if findendpoints_state is not None:
+            finder.set_state(findendpoints_state)
         for d in filtered_piece:
             finder.process(d)
         endpoints = finder.get_endpoints()
-        findendpoints_prev_point = finder.get_prev_point()
+        findendpoints_state = finder.get_state()
 
     data = np.vstack(filtered_pieces)
-    assert((data[:, 0] == endpoints[0][0]).nonzero()[0][0] == 478)
-    assert((data[:, 0] == endpoints[1][0]).nonzero()[0][0] == 669)
+    assert(_get_point_index(data, endpoints[0]) == 478)
+    assert(_get_point_index(data, endpoints[1]) == 669)
 
     AtoB_paths = []
     BtoA_paths = []
@@ -102,14 +109,6 @@ def test_finding_paths_with_state():
         AtoB_paths += AtoB_paths_piece
         BtoA_paths += BtoA_paths_piece
 
-    def _extract_indices(data, paths):
-        result = []
-        for p in paths:
-            indices = [(data[:, 0] == p[0, 0]).nonzero()[0][0],
-                       (data[:, 0] == p[p.shape[0]-1, 0]).nonzero()[0][0]]
-            result.append(indices)
-        return result
-
     AtoB_paths_indices = _extract_indices(data, AtoB_paths)
     BtoA_paths_indices = _extract_indices(data, BtoA_paths)
     print(AtoB_paths_indices)
@@ -118,6 +117,82 @@ def test_finding_paths_with_state():
     assert(AtoB_paths_indices == [[487, 655], [946, 1116], [1363, 1548], [2214, 2399], [2628, 2896], [4381, 4507]])
     assert(BtoA_paths_indices == [[133, 454], [682, 886], [1140, 1315], [1581, 1782], [2427, 2595], [3962, 4157]])
 
+
+def test_finding_paths_with_state_2():
+    folder = tempfile.mkdtemp()
+    s3 = S3('driverpete-storage')
+    pieces = []
+    pieces_keys = [
+        "_testing/testing_sequence0/data/14-09-2015_09-15-01_PDT",
+        "_testing/testing_sequence0/data/14-09-2015_11-03-24_PDT",
+        "_testing/testing_sequence0/data/14-09-2015_13-49-55_PDT",
+        "_testing/testing_sequence0/data/14-09-2015_18-20-13_PDT",
+        "_testing/testing_sequence0/data/14-09-2015_19-59-23_PDT",
+        "_testing/testing_sequence0/data/15-09-2015_09-32-15_PDT",
+        "_testing/testing_sequence0/data/15-09-2015_22-31-21_PDT"
+    ]
+    for k in pieces_keys:
+        filename = s3.download(k, folder)
+        pieces.append(read_compressed_trajectory(filename))
+        
+    filtered_pieces = []
+    endpoints = []
+    
+    findendpoints_state = None
+    filter_state = None
+    for pi, piece in enumerate(pieces):
+        vel_filter = VelocityOutliersFilter()
+        if filter_state is not None:
+            vel_filter.set_state(filter_state)
+        filter = FilterChain([DuplicateTimeFilter(),
+                              vel_filter])
+        filtered_piece = apply_filter(piece, filter)
+
+        filter_state = vel_filter.get_state()
+        
+        filtered_pieces.append(filtered_piece)
+        
+        finder = FindEndpoints(endpoints=endpoints)
+        if findendpoints_state is not None:
+            finder.set_state(findendpoints_state)
+        for i, d in enumerate(filtered_piece):
+            finder.process(d)
+        endpoints = finder.get_endpoints()
+        findendpoints_state = finder.get_state()
+
+    data = np.vstack(filtered_pieces)
+
+    assert(len(endpoints) == 2)
+    assert(_get_point_index(data, endpoints[0]) == 5)
+    assert(_get_point_index(data, endpoints[1]) == 121)
+
+    AtoB_paths = []
+    BtoA_paths = []
+    
+    finder_current_route = []
+    finder_endpoint_index = None
+    for piece in filtered_pieces:
+        
+        finder = RoutesFinder(endpoints)
+        finder.set_state(finder_current_route, finder_endpoint_index)
+        
+        for d in piece:
+            finder.process(d)
+
+        finder_current_route, finder_endpoint_index = finder.get_state()
+        
+        AtoB_paths_piece, BtoA_paths_piece = finder.get_routes()
+        AtoB_paths += AtoB_paths_piece
+        BtoA_paths += BtoA_paths_piece
+
+    AtoB_paths_indices = _extract_indices(data, AtoB_paths)
+    BtoA_paths_indices = _extract_indices(data, BtoA_paths)
+    
+    assert(AtoB_paths_indices == [[10, 110], [519, 692]])
+    assert(BtoA_paths_indices == [[262, 361]])
+
+
 if __name__ == '__main__':
-    #test_finding_paths()
+    test_finding_paths()
     test_finding_paths_with_state()
+    test_finding_paths_with_state_2()

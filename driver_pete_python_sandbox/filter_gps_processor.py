@@ -117,8 +117,6 @@ def apply_filter(data, afilter):
         if afilter.allow(prev_point, data[i]):
             prev_point = data[i]
             result.append(data[i])
-        else:
-            print(i)
 
     return np.array(result)
 

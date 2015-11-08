@@ -9,6 +9,7 @@
 from driver_pete_python_sandbox.filter_gps import delta_float_time
 import numpy as np
 from driver_pete_python_sandbox.utilities import distance, ms_to_mph
+from driver_pete_python_sandbox.gmaps import trajectory_point_to_str
 
 
 class DuplicateTimeFilter(object):
@@ -18,21 +19,6 @@ class DuplicateTimeFilter(object):
     def allow(self, current_p, next_p):
         dt = delta_float_time(current_p[0], next_p[0])
         if dt < 1:
-            return False
-        return True
-
-
-class StationaryPointsFilter(object):
-    '''
-    If coordinates are not changing, there is no need to keep the record because
-    timestamp can always show how long did we spend at that place
-    distance_threshold - which points consider to be close
-    '''
-    def __init__(self, distance_threshold=1.):
-        self._stationary_distance_threshold = distance_threshold
-    
-    def allow(self, current_p, next_p):
-        if distance(current_p, next_p) < self._stationary_distance_threshold:
             return False
         return True
 
@@ -77,7 +63,7 @@ class VelocityOutliersFilter(object):
         self._max_number_outliers = 3
         self._outliers_counter = self._max_number_outliers
     
-    def allow(self, current_p, next_p):
+    def allow(self, current_p, next_p):    
         dist = distance(current_p, next_p)
         dt = delta_float_time(current_p[0], next_p[0])
         v = ms_to_mph*dist/dt
@@ -91,6 +77,7 @@ class VelocityOutliersFilter(object):
                 self._outliers_counter -= 1
                 return False
         self._outliers_counter = self._max_number_outliers
+        
         return True
 
     def get_state(self):
@@ -122,8 +109,7 @@ def apply_filter(data, afilter):
     return np.array(result)
 
 
-def filter_gps_data(data, speed_mph_thershold=85, stationary_distance_threshold=1.):
+def filter_gps_data(data, speed_mph_thershold=85):
     filter = FilterChain([DuplicateTimeFilter(),
-                          StationaryPointsFilter(stationary_distance_threshold),
-                          VelocityOutliersFilter(speed_mph_thershold)])
+                          VelocityOutliersFilter(speed_mph_thershold=speed_mph_thershold)])
     return apply_filter(data, filter)

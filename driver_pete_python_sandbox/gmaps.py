@@ -8,11 +8,13 @@
 
 import cv2
 import urllib
+import pytz
 import numpy as np
 from geopy.geocoders import GoogleV3 as Geocoder
 from matplotlib.dates import datestr2num, num2date
 import matplotlib.pyplot as plots
 from polyline.codec import PolylineCodec
+from driver_pete_python_sandbox.utilities import distance, ms_to_mph
 
 
 def get_static_google_map(center=None, zoom=12, imgsize=(500, 500), imgformat="jpg",
@@ -75,17 +77,31 @@ def get_static_google_map(center=None, zoom=12, imgsize=(500, 500), imgformat="j
     return picture
 
 
-def trajectory_point_to_str(data, index):
-    geocoder = Geocoder()
-    request = "%s, %s" % tuple(data[index][1:])
-    address = geocoder.reverse(request, exactly_one = True).address
-    date = num2date(data[index][0])
+def trajectory_point_to_str(data, index, with_address=True):
+    coords = "%s, %s" % tuple(data[index][1:])
+    if with_address:
+        geocoder = Geocoder()
+        address = geocoder.reverse(coords, exactly_one = True).address
+    else:
+        address = None
+    tz = pytz.timezone('US/Pacific')
+    date = num2date(data[index][0], tz=tz)
     try:
-        duration = num2date(data[index+1][0]) - date
+        dt = (num2date(data[index+1][0]) - date).total_seconds()
+        dist = distance(data[index], data[index+1])
+        v = ms_to_mph*dist/dt if dt!=0 else 0
+        if dt < 60:
+            dt_str = "%ds" % dt
+        elif dt < 60*60:
+            dt_str = "%dmin" % (dt/60,)
+        else:
+            dt_str = "%.1fh" % (dt/60/60,)
+        metrics = "%s; %.2fm; %.fmph" % (dt_str, dist, v)
     except IndexError:
-        duration = "NO DATA"
-    return "Index:%s; Date:%s; Address:%s; Coords: %s; Duration:%s;" % \
-        (index, date, request, address, duration)
+        metrics = "NO DATA"
+
+    return "Index:%s; Date:%s; Address:%s; Coords: %s; dt,ds,v:%s" % \
+        (index, date, address, coords, metrics)
 
 
 def show_path(path, name='path'):

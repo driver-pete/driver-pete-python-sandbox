@@ -42,25 +42,29 @@ class Path(object):
 
 
 def process_gps_data(filename):
+    #stationary_distance_threshold=120
     # clean up data
-    data = filter_gps_data(read_compressed_trajectory(filename))
-    print("Length of data: %d" % len(data)) 
-
+    data = read_compressed_trajectory(filename)
+    print("Length of data: %d" % len(data))
+    
+    data = filter_gps_data(data)
+    print("Length of filtered data: %d" % len(data))
+    
     endpoints = find_endpoints(data)
-    assert(len(endpoints) == 2)
     print("Found %d endpoints:" % len(endpoints))
     for u in endpoints:
         print(trajectory_point_to_str([u], 0))
-
+    
+    assert(len(endpoints) == 2)
     AtoB_paths_data, BtoA_paths_data = find_routes(data, endpoints, verbose=False)
-
+    
     def _extract_indices(data, paths):
-        indices = []
+        result = []
         for p in paths:
             indices = [(data[:, 0] == p[0, 0]).nonzero()[0][0],
                        (data[:, 0] == p[p.shape[0]-1, 0]).nonzero()[0][0]]
-            indices.append(indices)
-        return indices
+            result.append(indices)
+        return result
 
     AtoB_paths_indices = _extract_indices(data, AtoB_paths_data)
     BtoA_paths_indices = _extract_indices(data, BtoA_paths_data)
@@ -74,10 +78,10 @@ def process_gps_data(filename):
     AtoB_paths = sorted(AtoB_paths, key=lambda x: x.get_duration())
     BtoA_paths = sorted(BtoA_paths, key=lambda x: x.get_duration())
 
-#     print("ATOB")
-#     for p in AtoB_paths:
-#         print(p.get_duration()/60, str(p.start_time()))
-#         p.show(str(p.get_duration()/60))
+    print("ATOB")
+    for p in AtoB_paths:
+        print(p.get_duration()/60, str(p.start_time()))
+        p.show(str(p.get_duration()/60))
 
     print("BTOA")
     for p in BtoA_paths:

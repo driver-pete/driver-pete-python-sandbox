@@ -15,7 +15,8 @@ def test_find_endpoints_procedural():
 
     endpoints_indices_batch = find_endpoints_batch(data)
     assert(len(endpoints_indices_batch) == 2)
-    assert(endpoints_indices_batch == [478, 669])
+    print(endpoints_indices_batch)
+    assert(endpoints_indices_batch == [479, 670])
 
     endpoints = find_endpoints(data)
     assert(len(endpoints) == 2)

@@ -24,4 +24,6 @@ def delta_float_time(time_float1, time_float2):
 
 
 def distance(datapoint1, datapoint2):
+    assert(len(datapoint1) == len(datapoint2))
+    assert(len(datapoint1) == 3)
     return vincenty(datapoint1[1:], datapoint2[1:]).meters
